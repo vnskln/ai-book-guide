@@ -6,7 +6,7 @@ An intelligent book recommendation system that helps readers choose their next b
 
 AI Book Guide is a smart book recommendation system powered by Claude 3.5 Sonnet. It helps readers choose their next book based on their reading preferences and history. The system generates personalized suggestions, providing a brief plot outline without spoilers, and learns from user feedback to improve recommendations over time.
 
-### Key Features
+## Key Features
 - Personalized book recommendations
 - Simple rating system (thumbs up/down)
 - Intelligent suggestions with plot outlines (no spoilers)
@@ -17,7 +17,6 @@ AI Book Guide is a smart book recommendation system powered by Claude 3.5 Sonnet
 - Customizable reading preferences
 
 ## Tech Stack
-
 - [Astro](https://astro.build/) v5.5.5 - Modern web framework for building fast, content-focused websites
 - [React](https://react.dev/) v19.0.0 - UI library for building interactive components
 - [TypeScript](https://www.typescriptlang.org/) v5 - Type-safe JavaScript
@@ -64,6 +63,7 @@ npm run build
 6. Open your browser and navigate to:
 ```
 http://localhost:3000
+```
 
 ## Available Scripts
 
