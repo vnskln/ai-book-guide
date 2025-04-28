@@ -33,7 +33,7 @@ AI Book Guide rozwiązuje ten problem poprzez:
 
 ### System kont użytkowników
 - Rejestracja i logowanie użytkowników
-- Profil użytkownika z opisem preferencji czytelniczych (max 1000 znaków)
+- Profil użytkownika z opisem preferencji czytelniczych (max 1000 znaków) oraz preferowanym językiem rekomendowanych książek
 - Możliwość edycji preferencji w dowolnym momencie
 
 ### Zarządzanie książkami
