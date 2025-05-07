@@ -6,6 +6,8 @@ import { APIError } from "../../lib/errors";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createPreferencesSchema } from "../../lib/schemas/preferences.schema";
 import { validateRequest } from "../../middleware/validation";
+import type { Locals } from "../../middleware";
+import { updatePreferencesSchema } from "../../lib/schemas/preferences.schema";
 
 export const prerender = false;
 
@@ -101,6 +103,88 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // Handle unknown errors
     logger.error("Unexpected error in preferences creation:", error);
+    return new Response(
+      JSON.stringify({
+        error: {
+          message: "Internal server error",
+          code: "INTERNAL_SERVER_ERROR",
+        },
+      }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  }
+};
+
+export const PUT: APIRoute = async ({ request, locals }) => {
+  try {
+    const typedLocals = locals as Locals;
+    const supabase = typedLocals.supabase;
+
+    // Parse and validate request body
+    const body = await request.json();
+    const validationResult = updatePreferencesSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      return new Response(
+        JSON.stringify({
+          error: {
+            message: "Invalid input data",
+            code: "VALIDATION_ERROR",
+            details: validationResult.error.errors,
+          },
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    // Update preferences using service
+    const preferencesService = new PreferencesService(supabase);
+    const preferences = await preferencesService.updatePreferences(DEFAULT_USER_ID, validationResult.data);
+
+    logger.info("Preferences updated successfully", { userId: DEFAULT_USER_ID, preferencesId: preferences.id });
+
+    return new Response(JSON.stringify(preferences), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  } catch (error: unknown) {
+    // Handle known errors
+    if (error instanceof APIError) {
+      logger.warn("API error in preferences update", {
+        code: error.code,
+        message: error.message,
+        statusCode: error.statusCode,
+      });
+      return new Response(
+        JSON.stringify({
+          error: {
+            message: error.message,
+            code: error.code,
+          },
+        }),
+        {
+          status: error.statusCode,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    // Handle unknown errors
+    logger.error("Unexpected error in preferences update:", error);
     return new Response(
       JSON.stringify({
         error: {

@@ -1,0 +1,11 @@
+preferences, get
+$baseUrl = "http://localhost:3000/api/preferences"; Write-Host "Testing GET /api/preferences" -ForegroundColor Green; Invoke-RestMethod -Uri $baseUrl -Method Get
+
+preferences, post
+$baseUrl = "http://localhost:3000/api/preferences"; $body = @{ reading_preferences = "I enjoy reading technical books and programming manuals"; preferred_language = "en" } | ConvertTo-Json; Write-Host "Testing POST /api/preferences" -ForegroundColor Green; Invoke-RestMethod -Uri $baseUrl -Method Post -Body $body -ContentType "application/json"
+
+preferences, put
+$baseUrl = "http://localhost:3000/api/preferences"; $body = @{ reading_preferences = "I enjoy reading history books and love novels"; preferred_language = "pl" } | ConvertTo-Json; Write-Host "Testing PUT /api/preferences" -ForegroundColor Green; Invoke-RestMethod -Uri $baseUrl -Method Put -Body $body -ContentType "application/json"
+
+user-books, get
+$baseUrl = "http://localhost:3000"; $endpoints = @("$baseUrl/api/user-books", "$baseUrl/api/user-books?status=read", "$baseUrl/api/user-books?is_recommended=true", "$baseUrl/api/user-books?page=2&limit=5", "$baseUrl/api/user-books?status=rejected"); Write-Host "`nTesting GET /api/user-books endpoint...`n" -ForegroundColor Cyan; foreach ($url in $endpoints) { Write-Host "Testing: $url" -ForegroundColor Yellow; try { $response = Invoke-WebRequest -Uri $url -Method GET; Write-Host "Status: $($response.StatusCode)" -ForegroundColor Green; Write-Host "Response:" -ForegroundColor Green; $response.Content | ConvertFrom-Json | ConvertTo-Json -Depth 10 } catch { Write-Host "Error: $($_.Exception.Response.StatusCode.value__) - $($_.Exception.Response.StatusDescription)" -ForegroundColor Red; Write-Host "Response:" -ForegroundColor Red; $_.ErrorDetails.Message }; Write-Host "`n---`n" }
