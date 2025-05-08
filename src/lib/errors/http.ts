@@ -23,3 +23,9 @@ export class ConflictError extends APIError {
     super(message, 409, "CONFLICT");
   }
 }
+
+export class InternalServerError extends APIError {
+  constructor(message = "Internal Server Error") {
+    super(message, 500, "INTERNAL_SERVER_ERROR");
+  }
+}

@@ -32,3 +32,19 @@ export const createUserBookSchema = z
   );
 
 export type CreateUserBookSchemaType = z.infer<typeof createUserBookSchema>;
+
+export const getUserBooksQuerySchema = z.object({
+  status: z.enum([UserBookStatus.READ, UserBookStatus.TO_READ, UserBookStatus.REJECTED]).optional(),
+  is_recommended: z
+    .string()
+    .optional()
+    .transform((val) => {
+      if (val === "true") return true;
+      if (val === "false") return false;
+      return undefined;
+    }),
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(100).default(20),
+});
+
+export type GetUserBooksQuery = z.infer<typeof getUserBooksQuerySchema>;

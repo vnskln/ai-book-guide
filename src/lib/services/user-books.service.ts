@@ -1,7 +1,9 @@
 import type { SupabaseClient } from "../../db/supabase.client";
 import type { CreateUserBookSchemaType } from "../schemas/user-books.schema";
-import type { UserBookResponseDto } from "../../types";
+import type { UserBookResponseDto, UserBookPaginatedResponseDto, PaginationInfo, AuthorDto } from "../../types";
 import { UserBookStatus } from "../../types";
+import type { GetUserBooksQuery } from "../schemas/user-books.schema";
+import { NotFoundError, InternalServerError } from "../errors";
 
 export class UserBooksService {
   constructor(private readonly supabase: SupabaseClient) {}
@@ -122,6 +124,95 @@ export class UserBooksService {
       recommendation_id: userBook.recommendation_id,
       created_at: userBook.created_at,
       updated_at: userBook.updated_at,
+    };
+  }
+
+  async getUserBooks(userId: string, query: GetUserBooksQuery): Promise<UserBookPaginatedResponseDto> {
+    const { status, is_recommended, page, limit } = query;
+
+    // Prepare base query
+    let baseQuery = this.supabase
+      .from("user_books")
+      .select(
+        `
+        id,
+        book_id,
+        status,
+        is_recommended,
+        rating,
+        recommendation_id,
+        created_at,
+        updated_at,
+        books:book_id (
+          id,
+          title,
+          language,
+          book_authors!inner (
+            authors!inner (
+              id,
+              name
+            )
+          )
+        )
+      `,
+        { count: "exact" }
+      )
+      .eq("user_id", userId);
+
+    // Add optional filters
+    if (status) {
+      baseQuery = baseQuery.eq("status", status);
+    }
+
+    if (is_recommended !== undefined) {
+      baseQuery = baseQuery.eq("is_recommended", is_recommended);
+    }
+
+    // Calculate pagination
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
+    // Execute query with pagination
+    const { data, error, count } = await baseQuery.range(from, to).order("created_at", { ascending: false });
+
+    if (error) {
+      throw new InternalServerError(`Error fetching user books: ${error.message}`);
+    }
+
+    if (!data) {
+      throw new NotFoundError("No books found");
+    }
+
+    // Transform data to response format
+    const userBooks: UserBookResponseDto[] = data.map((item) => {
+      const authors: AuthorDto[] = item.books.book_authors.map((ba) => ba.authors);
+
+      return {
+        id: item.id,
+        book_id: item.book_id,
+        title: item.books.title,
+        language: item.books.language,
+        authors,
+        status: item.status,
+        is_recommended: item.is_recommended,
+        rating: item.rating,
+        recommendation_id: item.recommendation_id,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+      };
+    });
+
+    // Prepare pagination info
+    const pagination: PaginationInfo = {
+      total: count || 0,
+      page,
+      limit,
+      total_pages: Math.ceil((count || 0) / limit),
+    };
+
+    return {
+      data: userBooks,
+      pagination,
     };
   }
 }
