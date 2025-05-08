@@ -1,9 +1,9 @@
 import type { APIRoute } from "astro";
-import { createUserBookSchema } from "../../lib/schemas/user-books.schema";
+import { createUserBookSchema, updateUserBookSchema } from "../../lib/schemas/user-books.schema";
 import { UserBooksService } from "../../lib/services/user-books.service";
 import { DEFAULT_USER_ID } from "../../db/supabase.client";
 import { getUserBooksQuerySchema } from "../../lib/schemas/user-books.schema";
-import { BadRequestError } from "../../lib/errors/http";
+import { BadRequestError, NotFoundError } from "../../lib/errors/http";
 
 export const prerender = false;
 
@@ -115,6 +115,63 @@ export const GET: APIRoute = async ({ request, locals }) => {
       headers: {
         "Content-Type": "application/json",
       },
+    });
+  }
+};
+
+export const PUT: APIRoute = async ({ request, locals }) => {
+  try {
+    // Extract book ID from URL
+    const url = new URL(request.url);
+    const id = url.searchParams.get("id");
+    if (!id) {
+      throw new BadRequestError("Book ID is required");
+    }
+
+    // Parse and validate request body
+    const body = await request.json();
+    const validationResult = updateUserBookSchema.safeParse(body);
+    if (!validationResult.success) {
+      throw new BadRequestError(
+        "Invalid input: " +
+          validationResult.error.errors.map((err) => `${err.path.join(".")}: ${err.message}`).join(", ")
+      );
+    }
+
+    // Update book using service
+    const userBooksService = new UserBooksService(locals.supabase);
+    const updatedBook = await userBooksService.updateUserBook(DEFAULT_USER_ID, id, validationResult.data);
+
+    return new Response(JSON.stringify(updatedBook), {
+      status: 200,
+      headers: JSON_RESPONSE_HEADERS,
+    });
+  } catch (error) {
+    if (error instanceof BadRequestError) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: error.statusCode,
+        headers: JSON_RESPONSE_HEADERS,
+      });
+    }
+
+    if (error instanceof NotFoundError || (error instanceof Error && error.message.includes("not found"))) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 404,
+        headers: JSON_RESPONSE_HEADERS,
+      });
+    }
+
+    if (error instanceof Error && error.message.includes("access denied")) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 403,
+        headers: JSON_RESPONSE_HEADERS,
+      });
+    }
+
+    console.error("Error in PUT /api/user-books:", error);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: JSON_RESPONSE_HEADERS,
     });
   }
 };

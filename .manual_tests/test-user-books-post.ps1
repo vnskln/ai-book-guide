@@ -216,6 +216,10 @@ foreach ($test in $testCases) {
             Write-Host "Duration: $($response.Duration.ToString('0.00'))ms" -ForegroundColor Gray
         }
     }
+    
+    # Add 10 second sleep after test
+    Write-Host "`nSleeping for 10 seconds..." -ForegroundColor Yellow
+    Start-Sleep -Seconds 10
 }
 
 $endTime = Get-Date

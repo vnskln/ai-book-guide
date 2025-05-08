@@ -48,3 +48,23 @@ export const getUserBooksQuerySchema = z.object({
 });
 
 export type GetUserBooksQuery = z.infer<typeof getUserBooksQuerySchema>;
+
+export const updateUserBookSchema = z
+  .object({
+    status: z.enum([UserBookStatus.READ, UserBookStatus.TO_READ, UserBookStatus.REJECTED]),
+    rating: z.boolean().nullable().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.status === UserBookStatus.READ && data.rating === undefined) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Rating is required when status is 'read'",
+      path: ["rating"],
+    }
+  );
+
+export type UpdateUserBookSchemaType = z.infer<typeof updateUserBookSchema>;

@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "../../db/supabase.client";
-import type { CreateUserBookSchemaType } from "../schemas/user-books.schema";
+import type { CreateUserBookSchemaType, UpdateUserBookSchemaType } from "../schemas/user-books.schema";
 import type { UserBookResponseDto, UserBookPaginatedResponseDto, PaginationInfo, AuthorDto } from "../../types";
 import { UserBookStatus } from "../../types";
 import type { GetUserBooksQuery } from "../schemas/user-books.schema";
@@ -214,5 +214,87 @@ export class UserBooksService {
       data: userBooks,
       pagination,
     };
+  }
+
+  async updateUserBook(
+    userId: string,
+    userBookId: string,
+    data: UpdateUserBookSchemaType
+  ): Promise<UserBookResponseDto> {
+    // First verify book ownership
+    const { data: existingBook, error: findError } = await this.supabase
+      .from("user_books")
+      .select("id")
+      .eq("id", userBookId)
+      .eq("user_id", userId)
+      .single();
+
+    if (findError) {
+      throw new Error(`Error verifying book ownership: ${findError.code} - ${findError.message}`);
+    }
+
+    if (!existingBook) {
+      throw new NotFoundError(`Book with ID ${userBookId} not found in user's collection`);
+    }
+
+    // Update the book and fetch updated data with authors
+    const { data: updatedBook, error: updateError } = await this.supabase
+      .from("user_books")
+      .update({
+        status: data.status,
+        rating: data.rating,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", userBookId)
+      .select(
+        `
+        id,
+        book_id,
+        status,
+        is_recommended,
+        rating,
+        recommendation_id,
+        created_at,
+        updated_at,
+        books:book_id (
+          title,
+          language,
+          book_authors (
+            authors (
+              id,
+              name
+            )
+          )
+        )
+      `
+      )
+      .single();
+
+    if (updateError) {
+      throw new Error(`Failed to update book: ${updateError.code} - ${updateError.message}`);
+    }
+
+    if (!updatedBook) {
+      throw new Error(`Book was updated but no data was returned. This might indicate a database inconsistency.`);
+    }
+
+    try {
+      // Transform the data to match UserBookResponseDto
+      return {
+        id: updatedBook.id,
+        book_id: updatedBook.book_id,
+        title: updatedBook.books.title,
+        language: updatedBook.books.language,
+        authors: updatedBook.books.book_authors.map((a) => a.authors),
+        status: updatedBook.status as UserBookStatus,
+        is_recommended: updatedBook.is_recommended,
+        rating: updatedBook.rating,
+        recommendation_id: updatedBook.recommendation_id,
+        created_at: updatedBook.created_at,
+        updated_at: updatedBook.updated_at,
+      };
+    } catch (error) {
+      throw new Error(`Error transforming book data: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
   }
 }
