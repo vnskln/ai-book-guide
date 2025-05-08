@@ -3,7 +3,7 @@ import type { CreateUserBookSchemaType, UpdateUserBookSchemaType } from "../sche
 import type { UserBookResponseDto, UserBookPaginatedResponseDto, PaginationInfo, AuthorDto } from "../../types";
 import { UserBookStatus } from "../../types";
 import type { GetUserBooksQuery } from "../schemas/user-books.schema";
-import { NotFoundError, InternalServerError } from "../errors";
+import { NotFoundError, InternalServerError, ForbiddenError } from "../errors";
 
 export class UserBooksService {
   constructor(private readonly supabase: SupabaseClient) {}
@@ -295,6 +295,37 @@ export class UserBooksService {
       };
     } catch (error) {
       throw new Error(`Error transforming book data: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  }
+
+  async deleteUserBook(userId: string, userBookId: string): Promise<void> {
+    // Check if book exists and belongs to user
+    const { data: userBook, error: findError } = await this.supabase
+      .from("user_books")
+      .select("id, user_id")
+      .eq("id", userBookId)
+      .single();
+
+    if (findError) {
+      if (findError.code === "PGRST116") {
+        throw new NotFoundError(`Book with ID ${userBookId} not found in user's collection`);
+      }
+      throw new Error(`Error verifying book ownership: ${findError.code} - ${findError.message}`);
+    }
+
+    if (!userBook) {
+      throw new NotFoundError(`Book with ID ${userBookId} not found in user's collection`);
+    }
+
+    if (userBook.user_id !== userId) {
+      throw new ForbiddenError("User does not own this book");
+    }
+
+    // Delete book from user's collection
+    const { error: deleteError } = await this.supabase.from("user_books").delete().eq("id", userBookId);
+
+    if (deleteError) {
+      throw new Error(`Failed to delete book: ${deleteError.code} - ${deleteError.message}`);
     }
   }
 }

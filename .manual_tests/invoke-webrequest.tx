@@ -10,3 +10,6 @@ $baseUrl = "http://localhost:3000/api/preferences"; $body = @{ reading_preferenc
 user-books, get
 $baseUrl = "http://localhost:3000"; $endpoints = @("$baseUrl/api/user-books", "$baseUrl/api/user-books?status=read", "$baseUrl/api/user-books?is_recommended=true", "$baseUrl/api/user-books?page=2&limit=5", "$baseUrl/api/user-books?status=rejected"); Write-Host "`nTesting GET /api/user-books endpoint...`n" -ForegroundColor Cyan; foreach ($url in $endpoints) { Write-Host "Testing: $url" -ForegroundColor Yellow; try { $response = Invoke-WebRequest -Uri $url -Method GET; Write-Host "Status: $($response.StatusCode)" -ForegroundColor Green; Write-Host "Response:" -ForegroundColor Green; $response.Content | ConvertFrom-Json | ConvertTo-Json -Depth 10 } catch { Write-Host "Error: $($_.Exception.Response.StatusCode.value__) - $($_.Exception.Response.StatusDescription)" -ForegroundColor Red; Write-Host "Response:" -ForegroundColor Red; $_.ErrorDetails.Message }; Write-Host "`n---`n" }
 Invoke-RestMethod -Uri "http://localhost:3000/api/user-books?status=read&is_recommended=false&page=1&limit=10" -Method GET -ContentType "application/json" | ConvertTo-Json -Depth 10
+
+user-books, delete
+Invoke-WebRequest -Method DELETE -Uri "http://localhost:3000/api/user-books?id=c5053dac-9ec6-42ca-8eaf-7934b84f18f9" -UseBasicParsing | Select-Object StatusCode,Content

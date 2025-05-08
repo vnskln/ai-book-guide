@@ -3,7 +3,8 @@ import { createUserBookSchema, updateUserBookSchema } from "../../lib/schemas/us
 import { UserBooksService } from "../../lib/services/user-books.service";
 import { DEFAULT_USER_ID } from "../../db/supabase.client";
 import { getUserBooksQuerySchema } from "../../lib/schemas/user-books.schema";
-import { BadRequestError, NotFoundError } from "../../lib/errors/http";
+import { BadRequestError, NotFoundError, ForbiddenError } from "../../lib/errors/http";
+import { logger } from "../../lib/utils/logger";
 
 export const prerender = false;
 
@@ -169,6 +170,50 @@ export const PUT: APIRoute = async ({ request, locals }) => {
     }
 
     console.error("Error in PUT /api/user-books:", error);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: JSON_RESPONSE_HEADERS,
+    });
+  }
+};
+
+export const DELETE: APIRoute = async ({ request, locals }) => {
+  try {
+    // Extract book ID from URL
+    const url = new URL(request.url);
+    const id = url.searchParams.get("id");
+
+    if (!id) {
+      return new Response(JSON.stringify({ error: "Book ID is required" }), {
+        status: 400,
+        headers: JSON_RESPONSE_HEADERS,
+      });
+    }
+
+    const userBooksService = new UserBooksService(locals.supabase);
+    await userBooksService.deleteUserBook(DEFAULT_USER_ID, id);
+
+    // Return 204 No Content for successful deletion
+    return new Response(null, { status: 204 });
+  } catch (error) {
+    // Handle specific errors
+    if (error instanceof ForbiddenError) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 403,
+        headers: JSON_RESPONSE_HEADERS,
+      });
+    }
+
+    if (error instanceof NotFoundError) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 404,
+        headers: JSON_RESPONSE_HEADERS,
+      });
+    }
+
+    // Log unexpected errors
+    logger.error("Error in DELETE /api/user-books:", error);
+
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: JSON_RESPONSE_HEADERS,

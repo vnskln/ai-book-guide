@@ -12,6 +12,12 @@ export class UnauthorizedError extends APIError {
   }
 }
 
+export class ForbiddenError extends APIError {
+  constructor(message = "Forbidden") {
+    super(message, 403, "FORBIDDEN");
+  }
+}
+
 export class NotFoundError extends APIError {
   constructor(message = "Resource Not Found") {
     super(message, 404, "NOT_FOUND");
