@@ -1,15 +1,13 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { AIService } from "./ai.service";
-import { RecommendationStatus, type RecommendationResponseDto } from "../../types";
+import {
+  RecommendationStatus,
+  type RecommendationResponseDto,
+  RecommendationPaginatedResponseDto,
+  BookAuthor,
+} from "../../types";
 import { DEFAULT_USER_ID } from "../../db/supabase.client";
 import { logger } from "../../lib/utils/logger";
-
-interface BookAuthor {
-  author: {
-    id: string;
-    name: string;
-  };
-}
 
 interface RecommendationResponse {
   id: string;
@@ -74,6 +72,13 @@ function parseExecutionTime(value: unknown): number {
 
   // Default to 1 if unparseable to pass Zod validation
   return 1;
+}
+
+interface BookAuthor {
+  author: {
+    id: string;
+    name: string;
+  };
 }
 
 export class RecommendationsService {
@@ -296,6 +301,151 @@ export class RecommendationsService {
       logger.error("Error in recommendation generation", {
         error: error instanceof Error ? error.message : "Unknown error",
         stack: error instanceof Error ? error.stack : undefined,
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Fetches paginated recommendations for a user with optional status filtering
+   * @param userId - The ID of the user to fetch recommendations for
+   * @param status - Optional status to filter recommendations by
+   * @param page - Page number for pagination (default: 1)
+   * @param limit - Number of items per page (default: 20)
+   * @returns Promise with paginated recommendations
+   */
+  public async getRecommendations(
+    userId: string,
+    status?: RecommendationStatus,
+    page = 1,
+    limit = 20
+  ): Promise<RecommendationPaginatedResponseDto> {
+    try {
+      logger.info("Fetching recommendations", { userId, status, page, limit });
+
+      // Calculate offset for pagination
+      const offset = (page - 1) * limit;
+
+      // Build base query
+      let query = this.supabase
+        .from("recommendations")
+        .select(
+          `
+          id,
+          book:books!inner (
+            id,
+            title,
+            language,
+            authors:book_authors!inner (
+              author:authors!inner (
+                id,
+                name
+              )
+            )
+          ),
+          plot_summary,
+          rationale,
+          ai_model,
+          execution_time,
+          status,
+          created_at,
+          updated_at
+        `,
+          { count: "exact" }
+        )
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      // Add status filter if provided
+      if (status) {
+        query = query.eq("status", status);
+      }
+
+      // Add pagination
+      query = query.range(offset, offset + limit - 1);
+
+      // Execute query
+      const { data, error, count } = await query;
+
+      if (error) {
+        logger.error("Error fetching recommendations", {
+          error: error.message,
+          details: error.details,
+          hint: error.hint,
+          userId,
+          status,
+          page,
+          limit,
+        });
+        throw new Error(`Failed to fetch recommendations: ${error.message}`);
+      }
+
+      // Return empty response if no data
+      if (!data || data.length === 0) {
+        logger.info("No recommendations found", { userId, status, page, limit });
+        return {
+          data: [],
+          pagination: {
+            total: 0,
+            page,
+            limit,
+            total_pages: 0,
+          },
+        };
+      }
+
+      // Calculate pagination info
+      const total = count || 0;
+      const total_pages = Math.ceil(total / limit);
+
+      // Transform data to DTO format
+      const recommendations = data.map((rec) => ({
+        id: rec.id,
+        book: {
+          id: rec.book.id,
+          title: rec.book.title,
+          language: rec.book.language,
+          authors: rec.book.authors.map((ba: any) => ({
+            id: ba.author.id,
+            name: ba.author.name,
+          })),
+        },
+        plot_summary: rec.plot_summary,
+        rationale: rec.rationale,
+        ai_model: rec.ai_model,
+        execution_time: rec.execution_time,
+        status: rec.status,
+        created_at: new Date(rec.created_at).toISOString(),
+        updated_at: rec.updated_at ? new Date(rec.updated_at).toISOString() : undefined,
+      }));
+
+      logger.info("Recommendations fetched successfully", {
+        userId,
+        status,
+        page,
+        limit,
+        total,
+        count: recommendations.length,
+      });
+
+      // Return paginated response
+      return {
+        data: recommendations,
+        pagination: {
+          total,
+          page,
+          limit,
+          total_pages,
+        },
+      };
+    } catch (error) {
+      logger.error("Error in getRecommendations", {
+        error: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
+        userId,
+        status,
+        page,
+        limit,
       });
       throw error;
     }
