@@ -64,6 +64,8 @@
 | ai_model          | text            | NOT NULL        | Użyty model AI                     |
 | execution_time    | interval        | NOT NULL        | Czas wykonania rekomendacji        |
 | status            | text            | NOT NULL        | Status: 'pending', 'accepted', 'rejected' |
+| plot_summary      | text            | NOT NULL        | AI-wygenerowane podsumowanie fabuły książki |
+| rationale         | text            | NOT NULL        | AI-wygenerowane wyjaśnienie, dlaczego ta książka została polecona |
 | created_at        | timestamptz     | NOT NULL        | Data wygenerowania                 |
 | updated_at        | timestamptz     | NOT NULL        | Data aktualizacji statusu          |
 
@@ -137,6 +139,18 @@ ALTER TABLE book_authors ADD CONSTRAINT unique_book_author
   UNIQUE (book_id, author_id);
 ```
 
+6. Ograniczenie długości podsumowania fabuły w rekomendacjach
+```sql
+ALTER TABLE recommendations ADD CONSTRAINT plot_summary_length
+  CHECK (length(plot_summary) <= 2000);
+```
+
+7. Ograniczenie długości uzasadnienia rekomendacji
+```sql
+ALTER TABLE recommendations ADD CONSTRAINT rationale_length
+  CHECK (length(rationale) <= 2000);
+```
+
 ## 5. Row Level Security (RLS)
 
 ### Tabela `user_preferences`
@@ -152,133 +166,3 @@ CREATE POLICY user_books_policy ON user_books
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 ```
-
-### Tabela `recommendations`
-```sql
-CREATE POLICY recommendations_policy ON recommendations
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-```
-
-## 6. Widoki
-
-### Przeczytane książki użytkownika
-```sql
-CREATE VIEW user_read_books AS
-SELECT 
-  ub.id, 
-  ub.user_id,
-  b.id as book_id,
-  b.title,
-  b.language,
-  string_agg(a.name, ', ') as authors,
-  ub.rating,
-  ub.is_recommended,
-  ub.created_at
-FROM 
-  user_books ub
-JOIN books b ON b.id = ub.book_id
-LEFT JOIN book_authors ba ON ba.book_id = b.id
-LEFT JOIN authors a ON a.id = ba.author_id
-WHERE 
-  ub.status = 'read'
-GROUP BY 
-  ub.id, ub.user_id, b.id, b.title, b.language, ub.rating, ub.is_recommended, ub.created_at;
-```
-
-### Książki do przeczytania
-```sql
-CREATE VIEW user_to_read_books AS
-SELECT 
-  ub.id, 
-  ub.user_id,
-  b.id as book_id,
-  b.title,
-  b.language,
-  string_agg(a.name, ', ') as authors,
-  ub.is_recommended,
-  ub.created_at
-FROM 
-  user_books ub
-JOIN books b ON b.id = ub.book_id
-LEFT JOIN book_authors ba ON ba.book_id = b.id
-LEFT JOIN authors a ON a.id = ba.author_id
-WHERE 
-  ub.status = 'to_read'
-GROUP BY 
-  ub.id, ub.user_id, b.id, b.title, b.language, ub.is_recommended, ub.created_at;
-```
-
-### Odrzucone książki
-```sql
-CREATE VIEW user_rejected_books AS
-SELECT 
-  ub.id, 
-  ub.user_id,
-  b.id as book_id,
-  b.title,
-  b.language,
-  string_agg(a.name, ', ') as authors,
-  ub.is_recommended,
-  ub.created_at
-FROM 
-  user_books ub
-JOIN books b ON b.id = ub.book_id
-LEFT JOIN book_authors ba ON ba.book_id = b.id
-LEFT JOIN authors a ON a.id = ba.author_id
-WHERE 
-  ub.status = 'rejected'
-GROUP BY 
-  ub.id, ub.user_id, b.id, b.title, b.language, ub.is_recommended, ub.created_at;
-```
-
-## 7. Funkcje i Triggery
-
-### Funkcja do aktualizacji statusu rekomendacji
-```sql
-CREATE OR REPLACE FUNCTION update_recommendation_status()
-RETURNS TRIGGER AS $$
-BEGIN
-  IF NEW.status = 'read' OR NEW.status = 'to_read' THEN
-    UPDATE recommendations SET status = 'accepted' 
-    WHERE id = NEW.recommendation_id;
-  ELSIF NEW.status = 'rejected' THEN
-    UPDATE recommendations SET status = 'rejected' 
-    WHERE id = NEW.recommendation_id;
-  END IF;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER after_user_book_update
-AFTER UPDATE ON user_books
-FOR EACH ROW
-WHEN (OLD.status IS DISTINCT FROM NEW.status)
-EXECUTE FUNCTION update_recommendation_status();
-```
-
-### Funkcja automatycznej aktualizacji timestampów
-```sql
-CREATE OR REPLACE FUNCTION update_timestamp()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = now();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER update_user_preferences_timestamp
-BEFORE UPDATE ON user_preferences
-FOR EACH ROW
-EXECUTE FUNCTION update_timestamp();
-
-CREATE TRIGGER update_user_books_timestamp
-BEFORE UPDATE ON user_books
-FOR EACH ROW
-EXECUTE FUNCTION update_timestamp();
-
-CREATE TRIGGER update_recommendations_timestamp
-BEFORE UPDATE ON recommendations
-FOR EACH ROW
-EXECUTE FUNCTION update_timestamp();
-``` 
