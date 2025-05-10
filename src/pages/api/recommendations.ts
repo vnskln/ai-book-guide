@@ -53,7 +53,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
 
     // Validate query parameters
     const result = recommendationQuerySchema.safeParse({
-      status: params.status,
+      status: params.status || undefined,
       page: params.page ? parseInt(params.page) : undefined,
       limit: params.limit ? parseInt(params.limit) : undefined,
     });
