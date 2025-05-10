@@ -17,4 +17,4 @@ recommendations, get
 Invoke-RestMethod -Uri "http://localhost:3000/api/recommendations" -Method Get -ContentType "application/json" | ConvertTo-Json -Depth 10
 
 recommendations, put
-$headers = @{ "Content-Type" = "application/json" }; $body = @{ status = "accepted" } | ConvertTo-Json; Invoke-RestMethod -Method Put -Uri "http://localhost:3000/api/recommendations/59053a72-104f-4109-8cc6-faeb723891c4" -Headers $headers -Body $body
+$headers = @{ 'Content-Type' = 'application/json' }; $body = @{ status = 'accepted' } | ConvertTo-Json; $recommendationId = '123'; $response = Invoke-RestMethod -Uri "http://localhost:3000/api/recommendations?id=$recommendationId" -Method PUT -Headers $headers -Body $body; $response | ConvertTo-Json -Depth 10
