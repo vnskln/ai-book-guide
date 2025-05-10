@@ -52,3 +52,9 @@ export const paginatedRecommendationResponseSchema = z.object({
 // Type exports
 export type RecommendationQuery = z.infer<typeof recommendationQuerySchema>;
 export type PaginatedRecommendationResponse = z.infer<typeof paginatedRecommendationResponseSchema>;
+
+export const updateRecommendationStatusSchema = z.object({
+  status: z.enum([RecommendationStatus.ACCEPTED, RecommendationStatus.REJECTED]),
+});
+
+export type UpdateRecommendationStatus = z.infer<typeof updateRecommendationStatusSchema>;

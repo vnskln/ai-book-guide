@@ -15,3 +15,6 @@ Invoke-WebRequest -Method DELETE -Uri "http://localhost:3000/api/user-books?id=c
 
 recommendations, get
 Invoke-RestMethod -Uri "http://localhost:3000/api/recommendations" -Method Get -ContentType "application/json" | ConvertTo-Json -Depth 10
+
+recommendations, put
+$headers = @{ "Content-Type" = "application/json" }; $body = @{ status = "accepted" } | ConvertTo-Json; Invoke-RestMethod -Method Put -Uri "http://localhost:3000/api/recommendations/59053a72-104f-4109-8cc6-faeb723891c4" -Headers $headers -Body $body

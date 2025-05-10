@@ -450,4 +450,135 @@ export class RecommendationsService {
       throw error;
     }
   }
+
+  /**
+   * Updates the status of a recommendation
+   * @param id - Recommendation ID
+   * @param userId - User ID
+   * @param status - New status (accepted or rejected)
+   * @returns Updated recommendation data
+   * @throws Error if recommendation not found or user doesn't own it
+   */
+  public async updateRecommendationStatus(
+    id: string,
+    userId: string,
+    status: RecommendationStatus
+  ): Promise<RecommendationResponseDto> {
+    try {
+      logger.info("Updating recommendation status", { id, userId, status });
+
+      // First check if recommendation exists and belongs to the user
+      const { data: recommendation, error: findError } = await this.supabase
+        .from("recommendations")
+        .select("id, user_id")
+        .eq("id", id)
+        .single();
+
+      if (findError) {
+        if (findError.code === "PGRST116") {
+          logger.error("Recommendation not found", { id });
+          throw new Error("Recommendation not found");
+        }
+
+        logger.error("Error finding recommendation", {
+          error: findError.message,
+          details: findError.details,
+          hint: findError.hint,
+          id,
+        });
+        throw new Error(`Failed to find recommendation: ${findError.message}`);
+      }
+
+      if (recommendation.user_id !== userId) {
+        logger.error("User does not own this recommendation", {
+          recommendationId: id,
+          ownerId: recommendation.user_id,
+          requestUserId: userId,
+        });
+        throw new Error("User does not own this recommendation");
+      }
+
+      // Update recommendation status and get updated data
+      const { data: updatedRecommendation, error: updateError } = await this.supabase
+        .from("recommendations")
+        .update({
+          status,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id)
+        .select(
+          `
+          id,
+          book:books!inner (
+            id,
+            title,
+            language,
+            authors:book_authors!inner (
+              author:authors!inner (
+                id,
+                name
+              )
+            )
+          ),
+          plot_summary,
+          rationale,
+          ai_model,
+          execution_time,
+          status,
+          created_at,
+          updated_at
+        `
+        )
+        .single();
+
+      if (updateError) {
+        logger.error("Error updating recommendation status", {
+          error: updateError.message,
+          details: updateError.details,
+          hint: updateError.hint,
+          id,
+          status,
+        });
+        throw new Error(`Failed to update recommendation status: ${updateError.message}`);
+      }
+
+      if (!updatedRecommendation) {
+        logger.error("Failed to update recommendation - no data returned", { id, status });
+        throw new Error("Failed to update recommendation - no data returned");
+      }
+
+      // Transform data to match DTO structure
+      const response: RecommendationResponseDto = {
+        id: updatedRecommendation.id,
+        book: {
+          id: updatedRecommendation.book.id,
+          title: updatedRecommendation.book.title,
+          language: updatedRecommendation.book.language,
+          authors: updatedRecommendation.book.authors.map((ba: any) => ({
+            id: ba.author.id,
+            name: ba.author.name,
+          })),
+        },
+        plot_summary: updatedRecommendation.plot_summary,
+        rationale: updatedRecommendation.rationale,
+        ai_model: updatedRecommendation.ai_model,
+        execution_time: updatedRecommendation.execution_time,
+        status: updatedRecommendation.status,
+        created_at: updatedRecommendation.created_at,
+        updated_at: updatedRecommendation.updated_at,
+      };
+
+      logger.info("Recommendation status updated successfully", { id, status });
+      return response;
+    } catch (error) {
+      logger.error("Error in updateRecommendationStatus", {
+        error: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
+        id,
+        userId,
+        status,
+      });
+      throw error;
+    }
+  }
 }

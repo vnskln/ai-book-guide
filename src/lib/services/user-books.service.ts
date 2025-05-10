@@ -328,4 +328,104 @@ export class UserBooksService {
       throw new Error(`Failed to delete book: ${deleteError.code} - ${deleteError.message}`);
     }
   }
+
+  async createUserBookFromRecommendation(userId: string, recommendationId: string): Promise<UserBookResponseDto> {
+    // First, get the recommendation details
+    const { data: recommendation, error: recommendationError } = await this.supabase
+      .from("recommendations")
+      .select(
+        `
+        book_id,
+        books:book_id (
+          title,
+          language,
+          book_authors (
+            authors (
+              id,
+              name
+            )
+          )
+        )
+      `
+      )
+      .eq("id", recommendationId)
+      .single();
+
+    if (recommendationError) {
+      throw new Error(`Error fetching recommendation: ${recommendationError.message}`);
+    }
+
+    if (!recommendation) {
+      throw new NotFoundError(`Recommendation with ID ${recommendationId} not found`);
+    }
+
+    // Check if user already has this book
+    const { data: existingUserBook } = await this.supabase
+      .from("user_books")
+      .select()
+      .eq("user_id", userId)
+      .eq("book_id", recommendation.book_id)
+      .single();
+
+    if (existingUserBook) {
+      throw new Error("Book already exists in user's collection");
+    }
+
+    // Create user book entry
+    const { data: userBook, error: userBookError } = await this.supabase
+      .from("user_books")
+      .insert({
+        user_id: userId,
+        book_id: recommendation.book_id,
+        status: UserBookStatus.TO_READ,
+        is_recommended: true,
+        recommendation_id: recommendationId,
+      })
+      .select(
+        `
+        id,
+        book_id,
+        status,
+        is_recommended,
+        rating,
+        recommendation_id,
+        created_at,
+        updated_at,
+        books:book_id (
+          title,
+          language,
+          book_authors (
+            authors (
+              id,
+              name
+            )
+          )
+        )
+      `
+      )
+      .single();
+
+    if (userBookError) {
+      throw new Error(`Error creating user book: ${userBookError.message}`);
+    }
+
+    if (!userBook) {
+      throw new Error("No user book data returned after creation");
+    }
+
+    // Transform response to match DTO
+    return {
+      id: userBook.id,
+      book_id: userBook.book_id,
+      title: userBook.books.title,
+      language: userBook.books.language,
+      authors: userBook.books.book_authors.map((ba: any) => ba.authors),
+      status: userBook.status as UserBookStatus,
+      is_recommended: userBook.is_recommended,
+      rating: userBook.rating,
+      recommendation_id: userBook.recommendation_id,
+      created_at: userBook.created_at,
+      updated_at: userBook.updated_at,
+    };
+  }
 }
