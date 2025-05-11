@@ -42,7 +42,7 @@ export function LoadingOverlay({ onCancel, onRetry, error }: LoadingOverlayProps
 
   if (timeoutReached || error) {
     return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] min-h-screen w-full">
         <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 space-y-4">
           <div className="flex items-center space-x-2 text-red-600">
             <XCircle className="h-6 w-6" />
@@ -65,7 +65,7 @@ export function LoadingOverlay({ onCancel, onRetry, error }: LoadingOverlayProps
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] min-h-screen w-full">
       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 space-y-4">
         <div className="flex items-center justify-center space-x-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />

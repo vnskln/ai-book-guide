@@ -87,6 +87,18 @@ export function useRecommendations() {
       // Create new AbortController
       abortControllerRef.current = new AbortController();
 
+      // Create timeout that will abort the controller
+      const timeoutId = setTimeout(() => {
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort();
+          setViewState((prev) => ({
+            ...prev,
+            status: RecommendationViewStatus.TIMEOUT,
+            error: "Request timed out after 30 seconds",
+          }));
+        }
+      }, 30000); // 30 seconds
+
       setViewState((prev) => ({ ...prev, status: RecommendationViewStatus.LOADING, error: null }));
 
       const response = await fetch("/api/recommendations", {
@@ -94,6 +106,9 @@ export function useRecommendations() {
         headers: { "Content-Type": "application/json" },
         signal: abortControllerRef.current.signal,
       });
+
+      // Clear timeout since request completed
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
@@ -106,7 +121,7 @@ export function useRecommendations() {
         currentRecommendation: data,
       }));
     } catch (error) {
-      // Don't update state if the request was aborted
+      // Don't update state if the request was aborted due to component unmount
       if (error instanceof Error && error.name === "AbortError") {
         return;
       }

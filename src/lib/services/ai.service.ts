@@ -121,8 +121,12 @@ export class AIService {
     executionTime: number;
     model: string;
   }> {
+    // Generate random delay between 3 and 40 seconds
+    const delaySeconds = Math.random() * (40 - 3) + 3;
+    const delayMs = Math.floor(delaySeconds * 1000);
+
     // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
 
     // Randomly select a mock recommendation
     const randomIndex = Math.floor(Math.random() * AIService.MOCK_RECOMMENDATIONS.length);
@@ -130,7 +134,7 @@ export class AIService {
 
     return {
       result: mockRecommendation,
-      executionTime: AIService.MOCK_EXECUTION_TIME,
+      executionTime: delaySeconds, // Use the actual delay time as execution time
       model: AIService.MOCK_AI_MODEL,
     };
   }
