@@ -1,11 +1,13 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import type { RecommendationResponseDto, RecommendationStatus } from "@/types";
+import type { RecommendationResponseDto } from "@/types";
+import { RecommendationStatus } from "@/types";
 import {
   RecommendationViewStatus,
   RecommendationActionStatus,
   type RecommendationViewState,
   type RecommendationActionState,
 } from "../types/recommendations";
+import { logger } from "../utils/logger";
 
 export function useRecommendations() {
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -39,8 +41,44 @@ export function useRecommendations() {
     }
   }, []);
 
+  const checkPendingRecommendations = useCallback(async () => {
+    try {
+      const params = new URLSearchParams();
+      params.append("status", RecommendationStatus.PENDING);
+      params.append("limit", "1");
+
+      const response = await fetch(`/api/recommendations?${params.toString()}`);
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.data.length > 0) {
+        const pendingRecommendation = data.data[0];
+        setViewState((prev) => ({
+          ...prev,
+          currentRecommendation: pendingRecommendation,
+        }));
+        return true;
+      }
+      return false;
+    } catch (error) {
+      logger.error("Failed to check pending recommendations", {
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+      return false;
+    }
+  }, []);
+
   const generateRecommendation = useCallback(async () => {
     try {
+      // Check for pending recommendations first
+      const hasPendingRecommendation = await checkPendingRecommendations();
+      if (hasPendingRecommendation) {
+        return;
+      }
+
       // Cancel any existing request
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -81,7 +119,7 @@ export function useRecommendations() {
     } finally {
       abortControllerRef.current = null;
     }
-  }, []);
+  }, [checkPendingRecommendations]);
 
   const updateRecommendationStatus = useCallback(async (id: string, status: RecommendationStatus) => {
     try {
@@ -155,21 +193,24 @@ export function useRecommendations() {
 
   const acceptRecommendation = useCallback(
     async (id: string) => {
-      await updateRecommendationStatus(id, "accepted" as RecommendationStatus);
+      await updateRecommendationStatus(id, RecommendationStatus.ACCEPTED);
     },
     [updateRecommendationStatus]
   );
 
   const rejectRecommendation = useCallback(
     async (id: string) => {
-      await updateRecommendationStatus(id, "rejected" as RecommendationStatus);
+      await updateRecommendationStatus(id, RecommendationStatus.REJECTED);
     },
     [updateRecommendationStatus]
   );
 
   useEffect(() => {
+    // Check for pending recommendations when component mounts
+    checkPendingRecommendations();
+    // Fetch history
     fetchHistory();
-  }, [fetchHistory]);
+  }, [checkPendingRecommendations, fetchHistory]);
 
   useEffect(() => {
     return () => {

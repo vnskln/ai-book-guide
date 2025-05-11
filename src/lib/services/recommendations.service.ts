@@ -311,14 +311,14 @@ export class RecommendationsService {
    * @param userId - The ID of the user to fetch recommendations for
    * @param status - Optional status to filter recommendations by
    * @param page - Page number for pagination (default: 1)
-   * @param limit - Number of items per page (default: 20)
+   * @param limit - Number of items per page (default: 10)
    * @returns Promise with paginated recommendations
    */
   public async getRecommendations(
     userId: string,
     status?: RecommendationStatus,
     page = 1,
-    limit = 20
+    limit = 10
   ): Promise<RecommendationPaginatedResponseDto> {
     try {
       logger.info("Fetching recommendations", { userId, status, page, limit });
