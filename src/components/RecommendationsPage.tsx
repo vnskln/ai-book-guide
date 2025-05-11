@@ -25,6 +25,7 @@ function RecommendationsPageContent() {
           <RecommendationButton
             onClick={generateRecommendation}
             isLoading={viewState.status === RecommendationViewStatus.LOADING}
+            currentRecommendation={viewState.currentRecommendation}
           />
         </section>
 
