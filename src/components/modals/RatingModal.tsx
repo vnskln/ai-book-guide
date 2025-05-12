@@ -9,13 +9,28 @@ import {
 import { Button } from "@/components/ui/button";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
 import { useToReadBooks } from "@/hooks/useToReadBooks";
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
+import { ToReadBooksContext } from "@/components/books/ToReadBooksView";
 
 export const RatingModal = () => {
-  const { selectedBook, showRatingModal, closeRatingModal, confirmRating } = useToReadBooks();
+  const context = useContext(ToReadBooksContext);
+  // Fallback to direct hook usage if not in context
+  const hookResult = useToReadBooks();
+  const { selectedBook, showRatingModal, closeRatingModal, confirmRating } = context || hookResult;
   const [selectedRating, setSelectedRating] = useState<boolean | null>(null);
 
+  console.log("RatingModal rendering with state:", {
+    selectedBook,
+    showRatingModal,
+    selectedRating,
+  });
+
+  useEffect(() => {
+    console.log("RatingModal effect - modal state changed:", showRatingModal);
+  }, [showRatingModal]);
+
   const handleConfirm = () => {
+    console.log("Confirm rating button clicked", { selectedBook, selectedRating });
     if (selectedBook && selectedRating !== null) {
       confirmRating(selectedBook.id, selectedRating);
       setSelectedRating(null);
@@ -23,8 +38,14 @@ export const RatingModal = () => {
   };
 
   const handleClose = () => {
+    console.log("Rating modal closed");
     setSelectedRating(null);
     closeRatingModal();
+  };
+
+  const handleRatingSelect = (rating: boolean) => {
+    console.log("Rating selected:", rating);
+    setSelectedRating(rating);
   };
 
   return (
@@ -43,7 +64,7 @@ export const RatingModal = () => {
           <Button
             variant={selectedRating === true ? "default" : "outline"}
             size="lg"
-            onClick={() => setSelectedRating(true)}
+            onClick={() => handleRatingSelect(true)}
             className="flex-1"
           >
             <ThumbsUp className="mr-2 h-5 w-5" />
@@ -52,11 +73,11 @@ export const RatingModal = () => {
           <Button
             variant={selectedRating === false ? "default" : "outline"}
             size="lg"
-            onClick={() => setSelectedRating(false)}
+            onClick={() => handleRatingSelect(false)}
             className="flex-1"
           >
             <ThumbsDown className="mr-2 h-5 w-5" />
-            Didn't like it
+            Didn&apos;t like it
           </Button>
         </div>
 

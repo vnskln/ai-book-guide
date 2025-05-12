@@ -8,12 +8,27 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useToReadBooks } from "@/hooks/useToReadBooks";
+import { useEffect, useContext } from "react";
+import { ToReadBooksContext } from "@/components/books/ToReadBooksView";
 
 type ButtonVariant = "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
 
 export const ConfirmationDialog = () => {
+  const context = useContext(ToReadBooksContext);
+  // Fallback to direct hook usage if not in context
+  const hookResult = useToReadBooks();
   const { selectedBook, showConfirmationDialog, confirmationAction, closeConfirmationDialog, confirmAction } =
-    useToReadBooks();
+    context || hookResult;
+
+  console.log("ConfirmationDialog rendering with state:", {
+    selectedBook,
+    showConfirmationDialog,
+    confirmationAction,
+  });
+
+  useEffect(() => {
+    console.log("ConfirmationDialog effect - dialog state changed:", showConfirmationDialog);
+  }, [showConfirmationDialog]);
 
   const getDialogContent = () => {
     if (!selectedBook || !confirmationAction) return null;
@@ -28,7 +43,7 @@ export const ConfirmationDialog = () => {
       title,
       description,
       confirmText: isDelete ? "Delete" : "Reject",
-      confirmVariant: (isDelete ? "destructive" : "default") satisfies ButtonVariant,
+      confirmVariant: isDelete ? "destructive" : ("default" as ButtonVariant),
     };
   };
 
@@ -36,8 +51,18 @@ export const ConfirmationDialog = () => {
 
   if (!content) return null;
 
+  const handleConfirm = () => {
+    console.log("Confirm button clicked in dialog");
+    confirmAction();
+  };
+
+  const handleClose = () => {
+    console.log("Dialog closed");
+    closeConfirmationDialog();
+  };
+
   return (
-    <Dialog open={showConfirmationDialog} onOpenChange={closeConfirmationDialog}>
+    <Dialog open={showConfirmationDialog} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{content.title}</DialogTitle>
@@ -51,10 +76,10 @@ export const ConfirmationDialog = () => {
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={closeConfirmationDialog}>
+          <Button variant="outline" onClick={handleClose}>
             Cancel
           </Button>
-          <Button variant={content.confirmVariant} onClick={confirmAction}>
+          <Button variant={content.confirmVariant} onClick={handleConfirm}>
             {content.confirmText}
           </Button>
         </DialogFooter>

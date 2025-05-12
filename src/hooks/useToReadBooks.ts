@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import type { UserBookPaginatedResponseDto, UserBookResponseDto, UserBookStatus, UpdateUserBookDto } from "@/types";
+import { UserBookStatus } from "@/types";
+import type { UserBookPaginatedResponseDto, UserBookResponseDto, UpdateUserBookDto } from "@/types";
 
 interface ToReadBooksViewModel {
   books: UserBookResponseDto[];
@@ -35,6 +36,7 @@ export const useToReadBooks = () => {
       const response = await fetch(`/api/user-books?status=to_read&page=${page}&limit=${limit}`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data: UserBookPaginatedResponseDto = await response.json();
+      console.log("Fetched books:", data);
       setViewModel((prev) => ({
         ...prev,
         books: data.data,
@@ -42,6 +44,7 @@ export const useToReadBooks = () => {
         isLoading: false,
       }));
     } catch (error) {
+      console.error("Error fetching books:", error);
       setViewModel((prev) => ({
         ...prev,
         error: error instanceof Error ? error.message : "Unknown error",
@@ -51,6 +54,7 @@ export const useToReadBooks = () => {
   };
 
   const updateBookStatus = async (bookId: string, newStatus: UserBookStatus, rating?: boolean) => {
+    console.log("Updating book status:", { bookId, newStatus, rating });
     const updateData: UpdateUserBookDto = {
       status: newStatus,
       ...(newStatus === UserBookStatus.READ ? { rating } : {}),
@@ -65,6 +69,7 @@ export const useToReadBooks = () => {
       await fetchBooks(viewModel.pagination.page);
       return true;
     } catch (error) {
+      console.error("Error updating book status:", error);
       setViewModel((prev) => ({
         ...prev,
         error: error instanceof Error ? error.message : "Unknown error",
@@ -74,6 +79,7 @@ export const useToReadBooks = () => {
   };
 
   const deleteBook = async (bookId: string) => {
+    console.log("Deleting book:", bookId);
     try {
       const response = await fetch(`/api/user-books?id=${bookId}`, {
         method: "DELETE",
@@ -82,6 +88,7 @@ export const useToReadBooks = () => {
       await fetchBooks(viewModel.pagination.page);
       return true;
     } catch (error) {
+      console.error("Error deleting book:", error);
       setViewModel((prev) => ({
         ...prev,
         error: error instanceof Error ? error.message : "Unknown error",
@@ -92,6 +99,7 @@ export const useToReadBooks = () => {
 
   // Modal and dialog handlers
   const openRatingModal = (book: UserBookResponseDto) => {
+    console.log("Opening rating modal for book:", book);
     setViewModel((prev) => ({
       ...prev,
       selectedBook: book,
@@ -100,6 +108,7 @@ export const useToReadBooks = () => {
   };
 
   const closeRatingModal = () => {
+    console.log("Closing rating modal");
     setViewModel((prev) => ({
       ...prev,
       selectedBook: null,
@@ -108,6 +117,7 @@ export const useToReadBooks = () => {
   };
 
   const confirmRating = async (bookId: string, rating: boolean) => {
+    console.log("Confirming rating:", { bookId, rating });
     const success = await updateBookStatus(bookId, UserBookStatus.READ, rating);
     if (success) {
       closeRatingModal();
@@ -115,6 +125,7 @@ export const useToReadBooks = () => {
   };
 
   const openConfirmationDialog = (book: UserBookResponseDto, action: "delete" | "reject") => {
+    console.log("Opening confirmation dialog:", { book, action });
     setViewModel((prev) => ({
       ...prev,
       selectedBook: book,
@@ -124,6 +135,7 @@ export const useToReadBooks = () => {
   };
 
   const closeConfirmationDialog = () => {
+    console.log("Closing confirmation dialog");
     setViewModel((prev) => ({
       ...prev,
       selectedBook: null,
@@ -133,6 +145,7 @@ export const useToReadBooks = () => {
   };
 
   const confirmAction = async () => {
+    console.log("Confirming action:", { selectedBook: viewModel.selectedBook, action: viewModel.confirmationAction });
     if (!viewModel.selectedBook || !viewModel.confirmationAction) return;
 
     const success =
@@ -147,6 +160,7 @@ export const useToReadBooks = () => {
 
   // Initial data fetch
   useEffect(() => {
+    console.log("Initial fetch of books");
     fetchBooks();
   }, []);
 

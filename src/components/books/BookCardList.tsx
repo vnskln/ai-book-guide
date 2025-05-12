@@ -1,10 +1,13 @@
-import { useToReadBooks } from "@/hooks/useToReadBooks";
+import { useContext } from "react";
 import { BookCard } from "./BookCard";
 import { EmptyStateMessage } from "./EmptyStateMessage";
 import { LoadingState } from "@/components/LoadingState";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import type { UserBookResponseDto } from "@/types";
+import { ToReadBooksContext } from "./ToReadBooksView";
+import { useToReadBooks } from "@/hooks/useToReadBooks";
 
 const ErrorFallback = ({ error, onRetry }: { error: string; onRetry: () => void }) => (
   <div className="text-center text-destructive p-4 rounded-lg bg-destructive/10">
@@ -17,7 +20,27 @@ const ErrorFallback = ({ error, onRetry }: { error: string; onRetry: () => void 
 );
 
 export const BookCardList = () => {
-  const { books, isLoading, error, openRatingModal, openConfirmationDialog } = useToReadBooks();
+  const context = useContext(ToReadBooksContext);
+  // Fallback to direct hook usage if not in context
+  const hookResult = useToReadBooks();
+  const { books, isLoading, error, openRatingModal, openConfirmationDialog } = context || hookResult;
+
+  console.log("BookCardList rendering with books:", books);
+
+  const handleMarkAsRead = (book: UserBookResponseDto) => {
+    console.log("Mark as Read clicked for book:", book);
+    openRatingModal(book);
+  };
+
+  const handleReject = (book: UserBookResponseDto) => {
+    console.log("Reject clicked for book:", book);
+    openConfirmationDialog(book, "reject");
+  };
+
+  const handleDelete = (book: UserBookResponseDto) => {
+    console.log("Delete clicked for book:", book);
+    openConfirmationDialog(book, "delete");
+  };
 
   if (isLoading) {
     return <LoadingState variant="default" text="Loading your books..." />;
@@ -38,9 +61,9 @@ export const BookCardList = () => {
           <BookCard
             key={book.id}
             book={book}
-            onMarkAsRead={openRatingModal}
-            onReject={(book) => openConfirmationDialog(book, "reject")}
-            onDelete={(book) => openConfirmationDialog(book, "delete")}
+            onMarkAsRead={handleMarkAsRead}
+            onReject={handleReject}
+            onDelete={handleDelete}
           />
         ))}
       </div>
