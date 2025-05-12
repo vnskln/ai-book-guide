@@ -57,7 +57,7 @@ export function BookCard({ book, onDelete, onRatingChange }: BookCardProps) {
           <div className="flex w-full gap-2">
             <Button
               variant={book.rating === true ? "default" : "outline"}
-              className="flex-1"
+              className={`flex-1 ${book.rating === true ? "bg-emerald-600 hover:bg-emerald-700" : "hover:bg-emerald-100"}`}
               onClick={() => handleRatingChange(true)}
               disabled={isUpdatingRating}
             >
@@ -66,7 +66,7 @@ export function BookCard({ book, onDelete, onRatingChange }: BookCardProps) {
             </Button>
             <Button
               variant={book.rating === false ? "default" : "outline"}
-              className="flex-1"
+              className={`flex-1 ${book.rating === false ? "bg-rose-600 hover:bg-rose-700" : "hover:bg-rose-100"}`}
               onClick={() => handleRatingChange(false)}
               disabled={isUpdatingRating}
             >
