@@ -7,6 +7,16 @@ import { useToReadBooks } from "@/hooks/useToReadBooks";
 // Create a context for the to-read books state
 export const ToReadBooksContext = createContext<ReturnType<typeof useToReadBooks> | null>(null);
 
+// Separate component for modals to ensure proper hydration
+function Modals() {
+  return (
+    <>
+      <RatingModal />
+      <ConfirmationDialog />
+    </>
+  );
+}
+
 export function ToReadBooksView() {
   console.log("ToReadBooksView mounting");
   const toReadBooksState = useToReadBooks();
@@ -14,8 +24,7 @@ export function ToReadBooksView() {
   return (
     <ToReadBooksContext.Provider value={toReadBooksState}>
       <BookCardList />
-      <RatingModal />
-      <ConfirmationDialog />
+      <Modals />
     </ToReadBooksContext.Provider>
   );
 }

@@ -10,7 +10,7 @@ import { UserBookStatus } from "@/types";
   <MyBooksLayout title="My Books">
     <BooksTabs client:load activeTab={UserBookStatus.TO_READ} />
     <div class="mt-8">
-      <ToReadBooksView client:load />
+      <ToReadBooksView client:only="react" />
     </div>
   </MyBooksLayout>
 </Layout>
