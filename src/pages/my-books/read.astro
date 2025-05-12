@@ -7,8 +7,10 @@ import { ReadBooksView } from "@/components/my-books/read/ReadBooksView";
 ---
 
 <Layout title="Read Books">
-  <MyBooksLayout title="My Books">
+  <MyBooksLayout title="My Books" client:load>
     <BooksTabs activeTab={UserBookStatus.READ} client:load />
-    <ReadBooksView client:load />
+    <div class="mt-8">
+      <ReadBooksView client:load />
+    </div>
   </MyBooksLayout>
 </Layout>

@@ -1,0 +1,64 @@
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { useToReadBooks } from "@/hooks/useToReadBooks";
+
+type ButtonVariant = "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+
+export const ConfirmationDialog = () => {
+  const { selectedBook, showConfirmationDialog, confirmationAction, closeConfirmationDialog, confirmAction } =
+    useToReadBooks();
+
+  const getDialogContent = () => {
+    if (!selectedBook || !confirmationAction) return null;
+
+    const isDelete = confirmationAction === "delete";
+    const title = isDelete ? "Delete Book" : "Reject Book";
+    const description = isDelete
+      ? "Are you sure you want to delete this book from your list? This action cannot be undone."
+      : "Are you sure you want to reject this book? It will be moved to your rejected books list.";
+
+    return {
+      title,
+      description,
+      confirmText: isDelete ? "Delete" : "Reject",
+      confirmVariant: (isDelete ? "destructive" : "default") satisfies ButtonVariant,
+    };
+  };
+
+  const content = getDialogContent();
+
+  if (!content) return null;
+
+  return (
+    <Dialog open={showConfirmationDialog} onOpenChange={closeConfirmationDialog}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{content.title}</DialogTitle>
+          <DialogDescription>
+            {selectedBook?.title}
+            <br />
+            by {selectedBook?.authors.map((author) => author.name).join(", ")}
+            <br />
+            <br />
+            {content.description}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={closeConfirmationDialog}>
+            Cancel
+          </Button>
+          <Button variant={content.confirmVariant} onClick={confirmAction}>
+            {content.confirmText}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};

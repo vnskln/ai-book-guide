@@ -1,0 +1,20 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { MyBooksLayout } from "@/components/my-books/layout/MyBooksLayout";
+import { BooksTabs } from "@/components/my-books/layout/BooksTabs";
+import { BookCardList } from "@/components/books/BookCardList";
+import { RatingModal } from "@/components/modals/RatingModal";
+import { ConfirmationDialog } from "@/components/modals/ConfirmationDialog";
+import { UserBookStatus } from "@/types";
+---
+
+<Layout title="My Books - To Read">
+  <MyBooksLayout title="My Books">
+    <BooksTabs client:load activeTab={UserBookStatus.TO_READ} />
+    <div class="mt-8">
+      <BookCardList client:load />
+    </div>
+    <RatingModal client:load />
+    <ConfirmationDialog client:load />
+  </MyBooksLayout>
+</Layout>
