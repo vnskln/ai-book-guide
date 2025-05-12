@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "../../db/supabase.client";
 import type { CreateUserBookSchemaType, UpdateUserBookSchemaType } from "../schemas/user-books.schema";
-import type { UserBookResponseDto, UserBookPaginatedResponseDto, PaginationInfo, AuthorDto } from "../../types";
+import type { UserBookResponseDto, UserBookPaginatedResponseDto, AuthorDto } from "../../types";
 import { UserBookStatus } from "../../types";
 import type { GetUserBooksQuery } from "../schemas/user-books.schema";
 import { NotFoundError, InternalServerError, ForbiddenError } from "../errors";
@@ -128,9 +128,9 @@ export class UserBooksService {
   }
 
   async getUserBooks(userId: string, query: GetUserBooksQuery): Promise<UserBookPaginatedResponseDto> {
-    const { status, is_recommended, page, limit } = query;
+    const { status, is_recommended, page = 1, limit = 20 } = query;
 
-    // Prepare base query
+    // Prepare base query with left joins
     let baseQuery = this.supabase
       .from("user_books")
       .select(
@@ -147,8 +147,8 @@ export class UserBooksService {
           id,
           title,
           language,
-          book_authors!inner (
-            authors!inner (
+          book_authors!left (
+            authors!left (
               id,
               name
             )
@@ -180,12 +180,20 @@ export class UserBooksService {
     }
 
     if (!data) {
-      throw new NotFoundError("No books found");
+      return {
+        data: [],
+        pagination: {
+          total: 0,
+          page,
+          limit,
+          total_pages: 0,
+        },
+      };
     }
 
     // Transform data to response format
     const userBooks: UserBookResponseDto[] = data.map((item) => {
-      const authors: AuthorDto[] = item.books.book_authors.map((ba) => ba.authors);
+      const authors: AuthorDto[] = item.books.book_authors?.map((ba) => ba.authors).filter(Boolean) || [];
 
       return {
         id: item.id,
@@ -202,17 +210,18 @@ export class UserBooksService {
       };
     });
 
-    // Prepare pagination info
-    const pagination: PaginationInfo = {
-      total: count || 0,
-      page,
-      limit,
-      total_pages: Math.ceil((count || 0) / limit),
-    };
+    // Calculate pagination info
+    const total = count || 0;
+    const total_pages = Math.ceil(total / limit);
 
     return {
       data: userBooks,
-      pagination,
+      pagination: {
+        total,
+        page,
+        limit,
+        total_pages,
+      },
     };
   }
 

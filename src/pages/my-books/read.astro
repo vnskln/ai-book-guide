@@ -1,0 +1,14 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { MyBooksLayout } from "@/components/my-books/layout/MyBooksLayout";
+import { BooksTabs } from "@/components/my-books/layout/BooksTabs";
+import { UserBookStatus } from "@/types";
+import { ReadBooksView } from "@/components/my-books/read/ReadBooksView";
+---
+
+<Layout title="Read Books">
+  <MyBooksLayout title="My Books">
+    <BooksTabs activeTab={UserBookStatus.READ} client:load />
+    <ReadBooksView client:load />
+  </MyBooksLayout>
+</Layout>
