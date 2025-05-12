@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ThumbsUp, ThumbsDown, Trash2, X } from "lucide-react";
+import { ThumbsUp, Trash2, X } from "lucide-react";
 import type { UserBookResponseDto } from "@/types";
 
 interface BookCardProps {
@@ -17,26 +17,29 @@ export const BookCard = ({ book, onMarkAsRead, onReject, onDelete }: BookCardPro
   return (
     <Card className="w-full">
       <CardHeader>
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-xl">{book.title}</CardTitle>
-            <CardDescription>{authors}</CardDescription>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="icon" onClick={() => onMarkAsRead(book)} title="Mark as read">
-              <ThumbsUp className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="icon" onClick={() => onReject(book)} title="Reject book">
-              <X className="h-4 w-4" />
-            </Button>
+        <div>
+          <CardTitle className="text-xl">{book.title}</CardTitle>
+          <CardDescription>{authors}</CardDescription>
+          <div className="flex flex-col gap-2 mt-2">
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => onMarkAsRead(book)} title="Mark as read">
+                <ThumbsUp className="h-4 w-4 mr-2" />
+                Mark as read
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => onReject(book)} title="Reject book">
+                <X className="h-4 w-4 mr-2" />
+                Reject book
+              </Button>
+            </div>
             <Button
               variant="outline"
-              size="icon"
+              size="sm"
               onClick={() => onDelete(book)}
               title="Delete book"
-              className="text-destructive hover:bg-destructive/10"
+              className="text-destructive hover:bg-destructive/10 w-fit"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete book
             </Button>
           </div>
         </div>
@@ -45,7 +48,6 @@ export const BookCard = ({ book, onMarkAsRead, onReject, onDelete }: BookCardPro
         <div className="flex justify-between text-sm text-muted-foreground">
           <span>Language: {book.language}</span>
           <span>Added: {formattedDate}</span>
-          {book.is_recommended && <span className="text-primary">Recommended</span>}
         </div>
       </CardContent>
     </Card>
