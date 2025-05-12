@@ -71,7 +71,7 @@ export function RejectedBooksList({ books, onMoveToRead, onDelete }: RejectedBoo
             <Cross2Icon className="h-8 w-8 text-muted-foreground" />
           </div>
           <div className="space-y-2">
-            <h3 className="font-semibold">No rejected books found</h3>
+            <h3 className="font-semibold">No rejected books</h3>
             <p className="text-sm text-muted-foreground">Books you reject will appear here</p>
           </div>
         </CardContent>
@@ -81,7 +81,7 @@ export function RejectedBooksList({ books, onMoveToRead, onDelete }: RejectedBoo
 
   return (
     <>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {books.map((book) => (
           <RejectedBookCard
             key={book.id}
