@@ -3,6 +3,7 @@ import { useReadBooks } from "./hooks/useReadBooks";
 import { EmptyReadBooksList } from "./EmptyReadBooksList";
 import { ReadBooksList } from "./ReadBooksList";
 import { AddBookModal } from "./AddBookModal";
+import { LoadingState } from "@/components/LoadingState";
 
 // Create a context for the add book functionality
 const AddBookContext = React.createContext<{
@@ -35,11 +36,7 @@ export function ReadBooksView() {
   }, []);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+    return <LoadingState variant="default" text="Loading your books..." />;
   }
 
   if (error) {
