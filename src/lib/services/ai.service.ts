@@ -121,8 +121,8 @@ export class AIService {
     executionTime: number;
     model: string;
   }> {
-    // Generate random delay between 3 and 40 seconds
-    const delaySeconds = Math.random() * (40 - 3) + 3;
+    // Generate random delay between 3 and 10 seconds
+    const delaySeconds = Math.random() * (10 - 3) + 3;
     const delayMs = Math.floor(delaySeconds * 1000);
 
     // Simulate API delay

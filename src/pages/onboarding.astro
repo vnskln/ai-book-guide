@@ -1,0 +1,23 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { OnboardingForm } from "../components/onboarding/OnboardingForm";
+
+// Redirect if user already has preferences
+const url = new URL("/api/preferences", Astro.url);
+const response = await fetch(url);
+if (response.ok) {
+  return Astro.redirect("/recommendations");
+}
+---
+
+<Layout title="Welcome to AI Book Guide - Onboarding">
+  <main class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+      <h1 class="text-4xl font-bold mb-4">Welcome to AI Book Guide</h1>
+      <p class="text-lg text-muted-foreground mb-8">
+        Help us understand your reading preferences so we can provide you with personalized book recommendations.
+      </p>
+      <OnboardingForm client:load />
+    </div>
+  </main>
+</Layout>
