@@ -28,7 +28,7 @@ export function RecommendationCard({ recommendation, isCompact = false }: Recomm
         !isCompact && "border-0 shadow-none"
       )}
     >
-      <CardHeader className="px-0">
+      <CardHeader>
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
             <CardTitle className="text-xl">{book.title}</CardTitle>
@@ -46,7 +46,7 @@ export function RecommendationCard({ recommendation, isCompact = false }: Recomm
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4 px-0">
+      <CardContent className="space-y-4">
         {!isCompact && (
           <>
             <div>
