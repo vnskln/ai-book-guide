@@ -5,6 +5,8 @@ import { LoadingOverlay } from "./LoadingOverlay";
 import { CurrentRecommendation } from "./CurrentRecommendation";
 import { RecommendationHistory } from "./RecommendationHistory";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { Button } from "@/components/ui/button";
+import { BookOpen } from "lucide-react";
 
 function RecommendationsPageContent() {
   const {
@@ -22,11 +24,22 @@ function RecommendationsPageContent() {
       <div className="space-y-8">
         <section className="text-center">
           <h1 className="text-4xl font-bold mb-8">Book Recommendations</h1>
-          <RecommendationButton
-            onClick={generateRecommendation}
-            isLoading={viewState.status === RecommendationViewStatus.LOADING}
-            currentRecommendation={viewState.currentRecommendation}
-          />
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <RecommendationButton
+              onClick={generateRecommendation}
+              isLoading={viewState.status === RecommendationViewStatus.LOADING}
+              currentRecommendation={viewState.currentRecommendation}
+            />
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full max-w-md"
+              onClick={() => (window.location.href = "/my-books/read")}
+            >
+              <BookOpen className="mr-2 h-4 w-4" />
+              View my book lists
+            </Button>
+          </div>
         </section>
 
         {viewState.status === RecommendationViewStatus.LOADING && (
