@@ -6,7 +6,7 @@ import {
   recommendationResponseSchema,
   updateRecommendationStatusSchema,
 } from "../../lib/schemas/recommendations.schema";
-import { RecommendationStatus } from "../../types";
+import { RecommendationStatus, UserBookStatus } from "../../types";
 import { logger } from "../../lib/utils/logger";
 import { DEFAULT_USER_ID } from "../../db/supabase.client";
 
@@ -198,20 +198,41 @@ export const PUT: APIRoute = async ({ request, locals }) => {
         status
       );
 
-      // If recommendation is accepted, create user book entry
-      if (status === RecommendationStatus.ACCEPTED) {
-        try {
-          const userBooksService = new UserBooksService(locals.supabase);
+      // Create user book entry for both accepted and rejected recommendations
+      try {
+        const userBooksService = new UserBooksService(locals.supabase);
+        if (status === RecommendationStatus.ACCEPTED) {
           await userBooksService.createUserBookFromRecommendation(DEFAULT_USER_ID, id);
-        } catch (error) {
-          // Log error but don't fail the request if user book creation fails
-          logger.error("Failed to create user book from recommendation", {
-            error: error instanceof Error ? error.message : "Unknown error",
-            stack: error instanceof Error ? error.stack : undefined,
-            recommendationId: id,
-            userId: DEFAULT_USER_ID,
-          });
+        } else if (status === RecommendationStatus.REJECTED) {
+          // Get book details from recommendation
+          const { data: recommendation } = await locals.supabase
+            .from("recommendations")
+            .select("book_id, books!inner(title, language, book_authors!inner(authors!inner(id, name)))")
+            .eq("id", id)
+            .single();
+
+          if (recommendation) {
+            await userBooksService.createUserBook(DEFAULT_USER_ID, {
+              book: {
+                title: recommendation.books.title,
+                language: recommendation.books.language,
+                authors: recommendation.books.book_authors.map((ba: any) => ({
+                  name: ba.authors.name,
+                })),
+              },
+              status: UserBookStatus.REJECTED,
+              recommendation_id: id,
+            });
+          }
         }
+      } catch (error) {
+        // Log error but don't fail the request if user book creation fails
+        logger.error("Failed to create user book from recommendation", {
+          error: error instanceof Error ? error.message : "Unknown error",
+          stack: error instanceof Error ? error.stack : undefined,
+          recommendationId: id,
+          userId: DEFAULT_USER_ID,
+        });
       }
 
       // Return successful response
