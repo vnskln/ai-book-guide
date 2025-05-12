@@ -3,6 +3,14 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Prevent layout shift from scrollbar */
+html {
+  overflow-y: scroll;
+  width: 100vw;
+  /* Prevent horizontal scrollbar */
+  overflow-x: hidden;
+}
+
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);

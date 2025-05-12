@@ -26,10 +26,6 @@ export function MyBooksLayout({ title, children }: MyBooksLayoutProps) {
     };
   }, []);
 
-  const handleBookSuggestionsClick = () => {
-    window.location.href = "/recommendations";
-  };
-
   return (
     <Container className="py-8">
       <div className="space-y-6" ref={layoutRef} data-my-books-layout>
@@ -42,14 +38,11 @@ export function MyBooksLayout({ title, children }: MyBooksLayoutProps) {
                 Add Book
               </Button>
             )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleBookSuggestionsClick}
-              className="border-muted-foreground flex items-center gap-2"
-            >
-              <LightningBoltIcon className="h-4 w-4" />
-              Book suggestions
+            <Button variant="outline" size="sm" asChild className="border-muted-foreground flex items-center gap-2">
+              <a href="/recommendations">
+                <LightningBoltIcon className="h-4 w-4" />
+                Book suggestions
+              </a>
             </Button>
           </div>
         </div>
