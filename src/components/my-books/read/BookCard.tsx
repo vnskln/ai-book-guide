@@ -31,7 +31,7 @@ export function BookCard({ book, onDelete, onRatingChange }: BookCardProps) {
       <Card>
         <CardHeader className="space-y-1">
           <div className="flex items-start justify-between gap-4">
-            <h3 className="line-clamp-2 text-lg font-semibold">{book.title}</h3>
+            <h3 className="text-lg font-semibold break-words">{book.title}</h3>
             <Button
               variant="ghost"
               size="icon"

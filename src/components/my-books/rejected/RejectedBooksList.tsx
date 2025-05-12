@@ -3,6 +3,8 @@ import type { UserBookResponseDto } from "@/types";
 import { RejectedBookCard } from "./RejectedBookCard";
 import { MoveToReadDialog } from "./MoveToReadDialog";
 import { DeleteBookDialog } from "@/components/my-books/read/DeleteBookDialog";
+import { Card, CardContent } from "@/components/ui/card";
+import { Cross2Icon } from "@radix-ui/react-icons";
 
 interface RejectedBooksListProps {
   books: UserBookResponseDto[];
@@ -63,10 +65,17 @@ export function RejectedBooksList({ books, onMoveToRead, onDelete }: RejectedBoo
 
   if (books.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[200px] text-center">
-        <p className="text-lg text-muted-foreground">No rejected books found</p>
-        <p className="text-sm text-muted-foreground mt-2">Books you reject will appear here</p>
-      </div>
+      <Card className="border-dashed">
+        <CardContent className="flex flex-col items-center justify-center gap-4 py-8 text-center">
+          <div className="rounded-full border-2 border-dashed border-muted p-4">
+            <Cross2Icon className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <div className="space-y-2">
+            <h3 className="font-semibold">No rejected books found</h3>
+            <p className="text-sm text-muted-foreground">Books you reject will appear here</p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
