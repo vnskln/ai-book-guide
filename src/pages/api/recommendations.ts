@@ -13,8 +13,12 @@ export const prerender = false;
 
 export const POST: APIRoute = async ({ locals }) => {
   try {
+    if (!locals.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    }
+
     const recommendationsService = new RecommendationsService(locals.supabase);
-    const recommendation = await recommendationsService.generateRecommendation();
+    const recommendation = await recommendationsService.generateRecommendation(locals.user.id);
 
     // Validate response
     const validatedResponse = recommendationResponseSchema.parse(recommendation);

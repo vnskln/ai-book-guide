@@ -7,28 +7,26 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useToReadBooks } from "@/hooks/useToReadBooks";
-import { useEffect, useContext } from "react";
+import { useContext } from "react";
 import { ToReadBooksContext } from "@/components/books/ToReadBooksView";
 
 type ButtonVariant = "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
 
 export const ConfirmationDialog = () => {
   const context = useContext(ToReadBooksContext);
-  // Fallback to direct hook usage if not in context
-  const hookResult = useToReadBooks();
-  const { selectedBook, showConfirmationDialog, confirmationAction, closeConfirmationDialog, confirmAction } =
-    context || hookResult;
+
+  if (!context) {
+    console.error("ConfirmationDialog must be used within ToReadBooksContext");
+    return null;
+  }
+
+  const { selectedBook, showConfirmationDialog, confirmationAction, closeConfirmationDialog, confirmAction } = context;
 
   console.log("ConfirmationDialog rendering with state:", {
     selectedBook,
     showConfirmationDialog,
     confirmationAction,
   });
-
-  useEffect(() => {
-    console.log("ConfirmationDialog effect - dialog state changed:", showConfirmationDialog);
-  }, [showConfirmationDialog]);
 
   const getDialogContent = () => {
     if (!selectedBook || !confirmationAction) return null;

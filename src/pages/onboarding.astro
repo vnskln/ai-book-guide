@@ -2,10 +2,20 @@
 import Layout from "../layouts/Layout.astro";
 import { OnboardingForm } from "../components/onboarding/OnboardingForm";
 
+// Check if user is authenticated
+const { user } = Astro.locals;
+if (!user) {
+  return Astro.redirect("/auth/login");
+}
+
 // Redirect if user already has preferences
-const url = new URL("/api/preferences", Astro.url);
-const response = await fetch(url);
-if (response.ok) {
+const { data: preferences } = await Astro.locals.supabase
+  .from("user_preferences")
+  .select("*")
+  .eq("user_id", user.id)
+  .single();
+
+if (preferences) {
   return Astro.redirect("/recommendations");
 }
 ---

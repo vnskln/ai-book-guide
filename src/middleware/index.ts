@@ -10,6 +10,7 @@ const PUBLIC_PATHS = [
   "/api/auth/login",
   "/api/auth/register",
   "/api/auth/reset-password",
+  "/api/auth/logout",
 ];
 
 export const onRequest = defineMiddleware(async ({ locals, cookies, request, redirect }, next) => {
@@ -17,14 +18,14 @@ export const onRequest = defineMiddleware(async ({ locals, cookies, request, red
   locals.supabase = supabase;
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  // Add user data to locals if session exists
-  if (session) {
+  // Add user data to locals if user exists
+  if (user) {
     locals.user = {
-      id: session.user.id,
-      email: session.user.email,
+      id: user.id,
+      email: user.email || undefined,
     };
   } else if (!PUBLIC_PATHS.includes(new URL(request.url).pathname)) {
     // Redirect to login for protected routes

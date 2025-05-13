@@ -140,10 +140,10 @@ export function useRecommendations() {
     try {
       setActionState({ status: RecommendationActionStatus.LOADING, error: null });
 
-      const response = await fetch(`/api/recommendations?id=${id}`, {
+      const response = await fetch("/api/recommendations", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ id, status }),
       });
 
       if (!response.ok) {

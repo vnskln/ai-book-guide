@@ -2,13 +2,15 @@ import React from "react";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { LightningBoltIcon, PlusIcon, GearIcon } from "@radix-ui/react-icons";
+import { UserHeader } from "@/components/UserHeader";
 
 interface MyBooksLayoutProps {
   title: string;
   children: React.ReactNode;
+  email: string;
 }
 
-export function MyBooksLayout({ title, children }: MyBooksLayoutProps) {
+export function MyBooksLayout({ title, children, email }: MyBooksLayoutProps) {
   const [addBookHandler, setAddBookHandler] = React.useState<(() => void) | null>(null);
   const layoutRef = React.useRef<HTMLDivElement>(null);
 
@@ -29,6 +31,7 @@ export function MyBooksLayout({ title, children }: MyBooksLayoutProps) {
   return (
     <Container className="py-8">
       <div className="space-y-6" ref={layoutRef} data-my-books-layout>
+        <UserHeader email={email} />
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
           <div className="flex items-center gap-2">

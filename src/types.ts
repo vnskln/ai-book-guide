@@ -1,5 +1,6 @@
 import type { Tables } from "./db/database.types";
-import type { SupabaseClient } from "./db/supabase.client";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "./db/database.types";
 
 // Common types and interfaces
 
@@ -210,10 +211,10 @@ export enum RecommendationStatus {
 
 declare module "astro" {
   interface Locals {
-    supabase: SupabaseClient;
-    user: {
+    supabase: SupabaseClient<Database>;
+    user?: {
       id: string;
-      email: string | undefined;
+      email: string;
     };
   }
 }

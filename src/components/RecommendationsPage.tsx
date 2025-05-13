@@ -8,8 +8,13 @@ import { ErrorBoundary } from "./ErrorBoundary";
 import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
 import { GearIcon } from "@radix-ui/react-icons";
+import { UserHeader } from "./UserHeader";
 
-function RecommendationsPageContent() {
+interface RecommendationsPageProps {
+  userEmail: string;
+}
+
+function RecommendationsPageContent({ userEmail }: RecommendationsPageProps) {
   const {
     viewState,
     actionState,
@@ -22,6 +27,7 @@ function RecommendationsPageContent() {
 
   return (
     <main className="container mx-auto px-4 py-8">
+      <UserHeader email={userEmail} />
       <div className="space-y-8">
         <section className="text-center">
           <h1 className="text-4xl font-bold mb-8">Book Recommendations</h1>
@@ -75,10 +81,10 @@ function RecommendationsPageContent() {
   );
 }
 
-export function RecommendationsPage() {
+export function RecommendationsPage(props: RecommendationsPageProps) {
   return (
     <ErrorBoundary>
-      <RecommendationsPageContent />
+      <RecommendationsPageContent {...props} />
     </ErrorBoundary>
   );
 }

@@ -1,8 +1,13 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { RecommendationsPage } from "@/components/RecommendationsPage";
+
+const { user } = Astro.locals;
+if (!user) {
+  return Astro.redirect("/auth/login");
+}
 ---
 
 <Layout title="AI Book Guide - Book Recommendations">
-  <RecommendationsPage client:load />
+  <RecommendationsPage client:load userEmail={user.email} />
 </Layout>

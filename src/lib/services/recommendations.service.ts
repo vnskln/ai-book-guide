@@ -6,7 +6,6 @@ import type {
   BookWithAuthorsDto,
   AuthorDto,
 } from "../../types";
-import { DEFAULT_USER_ID } from "../../db/supabase.client";
 import { logger } from "../utils/logger";
 import { OpenRouterService } from "./openrouter.service";
 
@@ -108,18 +107,23 @@ export class RecommendationsService {
 
   /**
    * Generates a new book recommendation for the user
+   * @param userId - The ID of the user to generate a recommendation for
    * @returns The generated recommendation
    */
-  public async generateRecommendation(): Promise<RecommendationResponseDto> {
+  public async generateRecommendation(userId: string): Promise<RecommendationResponseDto> {
     try {
       logger.info("Starting recommendation generation");
 
       // Get user preferences
       logger.info("Fetching user preferences");
-      const { data: preferences } = await this.supabase.from("user_preferences").select().single();
+      const { data: preferences } = await this.supabase
+        .from("user_preferences")
+        .select()
+        .eq("user_id", userId)
+        .single();
 
       if (!preferences) {
-        logger.error("User preferences not found", { userId: DEFAULT_USER_ID });
+        logger.error("User preferences not found", { userId });
         throw new Error("User preferences not found");
       }
       logger.info("User preferences found", { preferences });
@@ -129,6 +133,7 @@ export class RecommendationsService {
       const { data: readBooksIds } = await this.supabase
         .from("user_books")
         .select("book_id, rating")
+        .eq("user_id", userId)
         .eq("status", "read");
       logger.info("Read books found", { count: readBooksIds?.length || 0 });
 
@@ -137,12 +142,17 @@ export class RecommendationsService {
       const { data: rejectedBooksIds } = await this.supabase
         .from("user_books")
         .select("book_id")
+        .eq("user_id", userId)
         .eq("status", "rejected");
       logger.info("Rejected books found", { count: rejectedBooksIds?.length || 0 });
 
       // Get user's to-read books
       logger.info("Fetching user's to-read books");
-      const { data: toReadBooksIds } = await this.supabase.from("user_books").select("book_id").eq("status", "to_read");
+      const { data: toReadBooksIds } = await this.supabase
+        .from("user_books")
+        .select("book_id")
+        .eq("user_id", userId)
+        .eq("status", "to_read");
       logger.info("To-read books found", { count: toReadBooksIds?.length || 0 });
 
       // Fetch full book details with authors for read books
@@ -386,7 +396,7 @@ export class RecommendationsService {
       const { data: newRecommendation, error: recommendationError } = await this.supabase
         .from("recommendations")
         .insert({
-          user_id: DEFAULT_USER_ID,
+          user_id: userId,
           book_id: newBook.id,
           plot_summary: result.plot_summary,
           rationale: result.rationale,

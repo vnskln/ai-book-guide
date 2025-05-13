@@ -4,10 +4,12 @@ import { MyBooksLayout } from "@/components/my-books/layout/MyBooksLayout";
 import { BooksTabs } from "@/components/my-books/layout/BooksTabs";
 import { UserBookStatus } from "@/types";
 import { RejectedBooksView } from "@/components/my-books/rejected/RejectedBooksView";
+
+const userEmail = Astro.locals.user?.email || "";
 ---
 
 <Layout title="Rejected Books">
-  <MyBooksLayout title="My Books">
+  <MyBooksLayout title="My Books" email={userEmail}>
     <BooksTabs client:load activeTab={UserBookStatus.REJECTED} />
     <div class="mt-8">
       <RejectedBooksView client:load />

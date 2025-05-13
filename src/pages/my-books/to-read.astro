@@ -4,10 +4,12 @@ import { MyBooksLayout } from "@/components/my-books/layout/MyBooksLayout";
 import { BooksTabs } from "@/components/my-books/layout/BooksTabs";
 import { ToReadBooksView } from "@/components/books/ToReadBooksView";
 import { UserBookStatus } from "@/types";
+
+const userEmail = Astro.locals.user?.email || "";
 ---
 
 <Layout title="My Books - To Read">
-  <MyBooksLayout title="My Books">
+  <MyBooksLayout title="My Books" email={userEmail}>
     <BooksTabs client:load activeTab={UserBookStatus.TO_READ} />
     <div class="mt-8">
       <ToReadBooksView client:only="react" />

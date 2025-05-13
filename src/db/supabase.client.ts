@@ -61,5 +61,3 @@ export const createBrowserSupabaseClient = () => {
 };
 
 export type SupabaseClient = ReturnType<typeof createServerClient<Database>>;
-
-export const DEFAULT_USER_ID = "4220c9de-b650-47a9-902e-18fca8f33b58";
