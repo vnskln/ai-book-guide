@@ -74,10 +74,10 @@ US-001: Rejestracja użytkownika
 - Jako nowy użytkownik chcę utworzyć konto w systemie
 - Kryteria akceptacji:
   - Formularz rejestracji zawiera: email, hasło, potwierdzenie hasła
-  - Wymagane pole na opis preferencji czytelniczych (max 1000 znaków)
   - Walidacja unikalności adresu email
   - Walidacja siły hasła
   - Potwierdzenie utworzenia konta
+  - Udana rejestracja przekierowuje do onboardingu, gdzie użytkownik podaje swoje preferencje czytelniczne i preferowany język
 
 US-002: Logowanie użytkownika
 - Jako zarejestrowany użytkownik chcę się zalogować do systemu
@@ -93,6 +93,18 @@ US-003: Edycja preferencji czytelniczych
   - Wyświetlenie aktualnych preferencji
   - Walidacja długości tekstu (max 1000 znaków)
   - Potwierdzenie zapisania zmian
+
+US-003a: Bezpieczny dostęp
+- Opis: Jako użytkownik chcę mieć możliwość rejestracji i logowania się do systemu w sposób zapewniający bezpieczeństwo moich danych.
+- Kryteria akceptacji:
+  - Logowanie i rejestracja odbywają się na dedykowanych stronach.
+  - Logowanie wymaga podania adresu email i hasła.
+  - Rejestracja wymaga podania adresu email, hasła i potwierdzenia hasła.
+  - Dostęp do wszystkich funkcjonalności wymaga rejestracji i zalogowania
+  - Użytkownik może się wylogować z systemu poprzez przycisk w prawym górnym rogu.
+  - Nie korzystamy z zewnętrznych serwisów logowania (np. Google, GitHub).
+  - Odzyskiwanie hasła powinno być możliwe.
+
 
 ### Zarządzanie książkami
 
