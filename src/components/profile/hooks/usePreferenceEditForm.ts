@@ -62,10 +62,12 @@ export function usePreferenceEditForm() {
   };
 
   const handleChange = (field: keyof UpdateUserPreferencesDto, value: string) => {
+    const newData = { ...state.data, [field]: value };
     setState((prev) => ({
       ...prev,
-      data: { ...prev.data, [field]: value },
-      errors: { ...prev.errors, [field]: undefined },
+      data: newData,
+      errors: validateForm(),
+      status: "idle",
     }));
   };
 
@@ -100,7 +102,9 @@ export function usePreferenceEditForm() {
     }
   };
 
-  const isValid = Object.keys(state.errors).length === 0;
+  const isValid = Boolean(
+    state.data.reading_preferences?.trim() && state.data.preferred_language && Object.keys(state.errors).length === 0
+  );
 
   return {
     ...state,
