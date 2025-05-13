@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { supabaseClient as supabase, DEFAULT_USER_ID } from "@/db/supabase.client";
+import { DEFAULT_USER_ID } from "@/db/supabase.client";
 import type { UpdateUserPreferencesDto } from "@/types";
 import { logger } from "@/lib/utils/logger";
 
@@ -14,9 +14,9 @@ const updatePreferencesSchema = z.object({
 
 export const prerender = false;
 
-export const GET: APIRoute = async ({ request }) => {
+export const GET: APIRoute = async ({ locals }) => {
   try {
-    const { data: preferences, error } = await supabase.from("user_preferences").select("*").single();
+    const { data: preferences, error } = await locals.supabase.from("user_preferences").select("*").single();
 
     if (error) {
       logger.error("Failed to fetch preferences:", { error });
@@ -36,7 +36,7 @@ export const GET: APIRoute = async ({ request }) => {
   }
 };
 
-export const PUT: APIRoute = async ({ request }) => {
+export const PUT: APIRoute = async ({ request, locals }) => {
   try {
     const body = (await request.json()) as UpdateUserPreferencesDto;
 
@@ -60,7 +60,7 @@ export const PUT: APIRoute = async ({ request }) => {
       preferred_language: body.preferred_language,
     });
 
-    const { data: preferences, error } = await supabase
+    const { data: preferences, error } = await locals.supabase
       .from("user_preferences")
       .update({
         reading_preferences: body.reading_preferences,
@@ -95,7 +95,7 @@ export const PUT: APIRoute = async ({ request }) => {
   }
 };
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const body = (await request.json()) as UpdateUserPreferencesDto;
 
@@ -114,7 +114,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Check if preferences already exist
-    const { data: existingPreferences } = await supabase
+    const { data: existingPreferences } = await locals.supabase
       .from("user_preferences")
       .select()
       .eq("user_id", DEFAULT_USER_ID)
@@ -139,7 +139,7 @@ export const POST: APIRoute = async ({ request }) => {
       preferred_language: body.preferred_language,
     });
 
-    const { data: preferences, error } = await supabase
+    const { data: preferences, error } = await locals.supabase
       .from("user_preferences")
       .insert([
         {

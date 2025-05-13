@@ -9,10 +9,35 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Form submission will be implemented later
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Login failed");
+      }
+
+      // Redirect to recommendations page on success
+      window.location.href = "/recommendations";
+    } catch (err) {
+      setError("Login failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -39,6 +64,7 @@ export function LoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={isLoading}
             />
           </div>
           <div className="space-y-2">
@@ -49,6 +75,7 @@ export function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={isLoading}
             />
           </div>
           <div className="text-sm text-right">
@@ -58,8 +85,8 @@ export function LoginForm() {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          <Button type="submit" className="w-full">
-            Zaloguj się
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? "Logowanie..." : "Zaloguj się"}
           </Button>
           <p className="text-sm text-center">
             Nie masz jeszcze konta?{" "}

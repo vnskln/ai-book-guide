@@ -1,4 +1,5 @@
 import type { Tables } from "./db/database.types";
+import type { SupabaseClient } from "./db/supabase.client";
 
 // Common types and interfaces
 
@@ -205,4 +206,14 @@ export enum RecommendationStatus {
   ACCEPTED = "accepted",
   REJECTED = "rejected",
   NEW = "new",
+}
+
+declare module "astro" {
+  interface Locals {
+    supabase: SupabaseClient;
+    user?: {
+      id: string;
+      email: string | undefined;
+    };
+  }
 }
