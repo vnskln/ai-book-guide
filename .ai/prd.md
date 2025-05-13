@@ -86,15 +86,7 @@ US-002: Logowanie użytkownika
   - Obsługa błędnych danych logowania
   - Przekierowanie do głównego widoku po poprawnym logowaniu
 
-US-003: Edycja preferencji czytelniczych
-- Jako użytkownik chcę zaktualizować swoje preferencje czytelnicze
-- Kryteria akceptacji:
-  - Dostęp do formularza edycji z profilu użytkownika
-  - Wyświetlenie aktualnych preferencji
-  - Walidacja długości tekstu (max 1000 znaków)
-  - Potwierdzenie zapisania zmian
-
-US-003a: Bezpieczny dostęp
+US-002a: Bezpieczny dostęp
 - Opis: Jako użytkownik chcę mieć możliwość rejestracji i logowania się do systemu w sposób zapewniający bezpieczeństwo moich danych.
 - Kryteria akceptacji:
   - Logowanie i rejestracja odbywają się na dedykowanych stronach.
@@ -104,6 +96,14 @@ US-003a: Bezpieczny dostęp
   - Użytkownik może się wylogować z systemu poprzez przycisk w prawym górnym rogu.
   - Nie korzystamy z zewnętrznych serwisów logowania (np. Google, GitHub).
   - Odzyskiwanie hasła powinno być możliwe.
+
+US-003: Edycja preferencji czytelniczych
+- Jako użytkownik chcę zaktualizować swoje preferencje czytelnicze
+- Kryteria akceptacji:
+  - Dostęp do formularza edycji z profilu użytkownika
+  - Wyświetlenie aktualnych preferencji
+  - Walidacja długości tekstu (max 1000 znaków)
+  - Potwierdzenie zapisania zmian
 
 
 ### Zarządzanie książkami
