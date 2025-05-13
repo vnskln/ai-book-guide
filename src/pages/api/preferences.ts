@@ -1,203 +1,77 @@
 import type { APIRoute } from "astro";
-import { DEFAULT_USER_ID } from "../../db/supabase.client";
-import { logger } from "../../lib/utils/logger";
-import { PreferencesService } from "../../lib/services/preferences.service";
-import { APIError } from "../../lib/errors";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import { createPreferencesSchema } from "../../lib/schemas/preferences.schema";
-import { validateRequest } from "../../middleware/validation";
-import type { Locals } from "../../middleware";
-import { updatePreferencesSchema } from "../../lib/schemas/preferences.schema";
+import { z } from "zod";
+import { supabaseClient as supabase } from "@/db/supabase.client";
+import type { UpdateUserPreferencesDto } from "@/types";
+
+const updatePreferencesSchema = z.object({
+  reading_preferences: z
+    .string()
+    .min(1, "Reading preferences are required")
+    .max(1000, "Reading preferences cannot exceed 1000 characters"),
+  preferred_language: z.string().min(1, "Preferred language is required"),
+});
 
 export const prerender = false;
 
-interface Locals {
-  supabase: SupabaseClient;
-  user?: {
-    id: string;
-  };
-}
-
-export const GET: APIRoute = async ({ locals }) => {
-  const supabase = locals.supabase;
-
+export const GET: APIRoute = async ({ request }) => {
   try {
-    const preferencesService = new PreferencesService(supabase);
-    const preferences = await preferencesService.getPreferences(DEFAULT_USER_ID);
+    const { data: preferences, error } = await supabase.from("user_preferences").select("*").single();
 
-    if (!preferences) {
-      logger.info("Preferences not found for user", { userId: DEFAULT_USER_ID });
-      return new Response(JSON.stringify({ error: "Preferences not found" }), {
-        status: 404,
-        headers: {
-          "Content-Type": "application/json",
-        },
+    if (error) {
+      return new Response(JSON.stringify({ error: { message: "Failed to fetch preferences" } }), {
+        status: 500,
       });
     }
 
-    logger.info("Preferences retrieved successfully", { userId: DEFAULT_USER_ID });
     return new Response(JSON.stringify(preferences), {
       status: 200,
-      headers: {
-        "Content-Type": "application/json",
-      },
     });
   } catch (error) {
-    logger.error("Error in preferences endpoint:", error);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
+    return new Response(JSON.stringify({ error: { message: "Internal server error" } }), {
       status: 500,
-      headers: {
-        "Content-Type": "application/json",
-      },
     });
   }
 };
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const PUT: APIRoute = async ({ request }) => {
   try {
-    const typedLocals = locals as Locals;
-    const supabase = typedLocals.supabase;
+    const body = (await request.json()) as UpdateUserPreferencesDto;
 
-    // Validate request body
-    const validatedBody = await validateRequest(request, createPreferencesSchema);
-    logger.info("Received valid preferences creation request", { userId: DEFAULT_USER_ID });
-
-    // Create preferences using service
-    const preferencesService = new PreferencesService(supabase);
-    const preferences = await preferencesService.createPreferences(DEFAULT_USER_ID, validatedBody);
-
-    logger.info("Preferences created successfully", { userId: DEFAULT_USER_ID, preferencesId: preferences.id });
-    return new Response(JSON.stringify(preferences), {
-      status: 201,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  } catch (error: unknown) {
-    if (error instanceof Response) {
-      return error;
-    }
-
-    // Handle known errors
-    if (error instanceof APIError) {
-      logger.warn("API error in preferences creation", {
-        code: error.code,
-        message: error.message,
-        statusCode: error.statusCode,
-      });
-      return new Response(
-        JSON.stringify({
-          error: {
-            message: error.message,
-            code: error.code,
-          },
-        }),
-        {
-          status: error.statusCode,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
-
-    // Handle unknown errors
-    logger.error("Unexpected error in preferences creation:", error);
-    return new Response(
-      JSON.stringify({
-        error: {
-          message: "Internal server error",
-          code: "INTERNAL_SERVER_ERROR",
-        },
-      }),
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-  }
-};
-
-export const PUT: APIRoute = async ({ request, locals }) => {
-  try {
-    const typedLocals = locals as Locals;
-    const supabase = typedLocals.supabase;
-
-    // Parse and validate request body
-    const body = await request.json();
     const validationResult = updatePreferencesSchema.safeParse(body);
-
     if (!validationResult.success) {
       return new Response(
         JSON.stringify({
           error: {
-            message: "Invalid input data",
-            code: "VALIDATION_ERROR",
+            message: "Invalid input",
             details: validationResult.error.errors,
           },
         }),
-        {
-          status: 400,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        { status: 400 }
       );
     }
 
-    // Update preferences using service
-    const preferencesService = new PreferencesService(supabase);
-    const preferences = await preferencesService.updatePreferences(DEFAULT_USER_ID, validationResult.data);
+    const { data: preferences, error } = await supabase
+      .from("user_preferences")
+      .update({
+        reading_preferences: body.reading_preferences,
+        preferred_language: body.preferred_language,
+        updated_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
 
-    logger.info("Preferences updated successfully", { userId: DEFAULT_USER_ID, preferencesId: preferences.id });
+    if (error) {
+      return new Response(JSON.stringify({ error: { message: "Failed to update preferences" } }), {
+        status: 500,
+      });
+    }
 
     return new Response(JSON.stringify(preferences), {
       status: 200,
-      headers: {
-        "Content-Type": "application/json",
-      },
     });
-  } catch (error: unknown) {
-    // Handle known errors
-    if (error instanceof APIError) {
-      logger.warn("API error in preferences update", {
-        code: error.code,
-        message: error.message,
-        statusCode: error.statusCode,
-      });
-      return new Response(
-        JSON.stringify({
-          error: {
-            message: error.message,
-            code: error.code,
-          },
-        }),
-        {
-          status: error.statusCode,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
-
-    // Handle unknown errors
-    logger.error("Unexpected error in preferences update:", error);
-    return new Response(
-      JSON.stringify({
-        error: {
-          message: "Internal server error",
-          code: "INTERNAL_SERVER_ERROR",
-        },
-      }),
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+  } catch (error) {
+    return new Response(JSON.stringify({ error: { message: "Internal server error" } }), {
+      status: 500,
+    });
   }
 };
