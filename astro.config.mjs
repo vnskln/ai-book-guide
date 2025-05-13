@@ -19,6 +19,7 @@ export default defineConfig({
         "@": fileURLToPath(new URL("./src", import.meta.url)),
       },
     },
+    envPrefix: ["PUBLIC_", "OPENROUTER_", "SUPABASE_", "SITE_"],
   },
   adapter: node({
     mode: "standalone",

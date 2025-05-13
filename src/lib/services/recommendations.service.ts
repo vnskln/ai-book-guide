@@ -1,13 +1,31 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-import { AIService } from "./ai.service";
-import {
-  RecommendationStatus,
-  type RecommendationResponseDto,
+import type { SupabaseClient } from "../../db/supabase.client";
+import { RecommendationStatus } from "../../types";
+import type {
+  RecommendationResponseDto,
   RecommendationPaginatedResponseDto,
-  BookAuthor,
+  BookWithAuthorsDto,
+  AuthorDto,
 } from "../../types";
 import { DEFAULT_USER_ID } from "../../db/supabase.client";
-import { logger } from "../../lib/utils/logger";
+import { logger } from "../utils/logger";
+import { OpenRouterService } from "./openrouter.service";
+
+// Define book-author relationship interface for typed access
+interface BookAuthorRelation {
+  authors: {
+    id: string;
+    name: string;
+  };
+}
+
+// For query results from Supabase
+interface BookDetailsResult {
+  id: string;
+  title: string;
+  language: string;
+  created_at: string;
+  authors: BookAuthorRelation[];
+}
 
 interface RecommendationResponse {
   id: string;
@@ -82,10 +100,10 @@ interface BookAuthor {
 }
 
 export class RecommendationsService {
-  private aiService: AIService;
+  private openRouterService: OpenRouterService;
 
   constructor(private readonly supabase: SupabaseClient) {
-    this.aiService = new AIService();
+    this.openRouterService = new OpenRouterService(supabase);
   }
 
   /**
@@ -108,197 +126,298 @@ export class RecommendationsService {
 
       // Get user's read books
       logger.info("Fetching user's read books");
-      const { data: readBooks } = await this.supabase.from("user_books").select("book_id").eq("status", "read");
-      logger.info("Read books found", { count: readBooks?.length || 0 });
+      const { data: readBooksIds } = await this.supabase.from("user_books").select("book_id").eq("status", "read");
+      logger.info("Read books found", { count: readBooksIds?.length || 0 });
 
       // Get user's rejected books
       logger.info("Fetching user's rejected books");
-      const { data: rejectedBooks } = await this.supabase.from("user_books").select("book_id").eq("status", "rejected");
-      logger.info("Rejected books found", { count: rejectedBooks?.length || 0 });
+      const { data: rejectedBooksIds } = await this.supabase
+        .from("user_books")
+        .select("book_id")
+        .eq("status", "rejected");
+      logger.info("Rejected books found", { count: rejectedBooksIds?.length || 0 });
 
-      // Generate recommendation using AI
-      logger.info("Generating AI recommendation");
-      const { result, executionTime, model } = await this.aiService.generateRecommendation(
+      // Get user's to-read books
+      logger.info("Fetching user's to-read books");
+      const { data: toReadBooksIds } = await this.supabase.from("user_books").select("book_id").eq("status", "to_read");
+      logger.info("To-read books found", { count: toReadBooksIds?.length || 0 });
+
+      // Fetch full book details with authors for read books
+      const readBookIds = readBooksIds?.map((b) => b.book_id) || [];
+      const readBooks: BookWithAuthorsDto[] = [];
+
+      if (readBookIds.length > 0) {
+        logger.info("Fetching read books details");
+        const { data: readBooksDetails } = await this.supabase
+          .from("books")
+          .select(
+            `
+            id, 
+            title, 
+            language,
+            created_at,
+            authors:book_authors(
+              authors:authors(
+                id,
+                name
+              )
+            )
+          `
+          )
+          .in("id", readBookIds);
+
+        if (readBooksDetails) {
+          (readBooksDetails as BookDetailsResult[]).forEach((book) => {
+            const bookAuthors: AuthorDto[] = [];
+
+            // Extract authors from the nested structure
+            book.authors.forEach((relation: BookAuthorRelation) => {
+              if (relation.authors) {
+                bookAuthors.push({
+                  id: relation.authors.id,
+                  name: relation.authors.name,
+                });
+              }
+            });
+
+            readBooks.push({
+              id: book.id,
+              title: book.title,
+              language: book.language,
+              created_at: book.created_at,
+              authors: bookAuthors,
+            });
+          });
+        }
+        logger.info("Read books details fetched", { count: readBooks.length });
+      }
+
+      // Fetch full book details with authors for rejected books
+      const rejectedBookIds = rejectedBooksIds?.map((b) => b.book_id) || [];
+      const rejectedBooks: BookWithAuthorsDto[] = [];
+
+      if (rejectedBookIds.length > 0) {
+        logger.info("Fetching rejected books details");
+        const { data: rejectedBooksDetails } = await this.supabase
+          .from("books")
+          .select(
+            `
+            id, 
+            title, 
+            language,
+            created_at,
+            authors:book_authors(
+              authors:authors(
+                id,
+                name
+              )
+            )
+          `
+          )
+          .in("id", rejectedBookIds);
+
+        if (rejectedBooksDetails) {
+          (rejectedBooksDetails as BookDetailsResult[]).forEach((book) => {
+            const bookAuthors: AuthorDto[] = [];
+
+            // Extract authors from the nested structure
+            book.authors.forEach((relation: BookAuthorRelation) => {
+              if (relation.authors) {
+                bookAuthors.push({
+                  id: relation.authors.id,
+                  name: relation.authors.name,
+                });
+              }
+            });
+
+            rejectedBooks.push({
+              id: book.id,
+              title: book.title,
+              language: book.language,
+              created_at: book.created_at,
+              authors: bookAuthors,
+            });
+          });
+        }
+        logger.info("Rejected books details fetched", { count: rejectedBooks.length });
+      }
+
+      // Fetch full book details with authors for to-read books
+      const toReadBookIds = toReadBooksIds?.map((b) => b.book_id) || [];
+      const toReadBooks: BookWithAuthorsDto[] = [];
+
+      if (toReadBookIds.length > 0) {
+        logger.info("Fetching to-read books details");
+        const { data: toReadBooksDetails } = await this.supabase
+          .from("books")
+          .select(
+            `
+            id, 
+            title, 
+            language,
+            created_at,
+            authors:book_authors(
+              authors:authors(
+                id,
+                name
+              )
+            )
+          `
+          )
+          .in("id", toReadBookIds);
+
+        if (toReadBooksDetails) {
+          (toReadBooksDetails as BookDetailsResult[]).forEach((book) => {
+            const bookAuthors: AuthorDto[] = [];
+
+            // Extract authors from the nested structure
+            book.authors.forEach((relation: BookAuthorRelation) => {
+              if (relation.authors) {
+                bookAuthors.push({
+                  id: relation.authors.id,
+                  name: relation.authors.name,
+                });
+              }
+            });
+
+            toReadBooks.push({
+              id: book.id,
+              title: book.title,
+              language: book.language,
+              created_at: book.created_at,
+              authors: bookAuthors,
+            });
+          });
+        }
+        logger.info("To-read books details fetched", { count: toReadBooks.length });
+      }
+
+      // Generate recommendation using OpenRouter API
+      logger.info("Generating OpenRouter recommendation");
+      const { result, executionTime, model } = await this.openRouterService.generateRecommendation(
         preferences.reading_preferences,
-        readBooks?.map((b) => b.book_id) || [],
-        rejectedBooks?.map((b) => b.book_id) || []
+        readBooks,
+        rejectedBooks,
+        toReadBooks,
+        preferences.preferred_language
       );
-      logger.info("AI recommendation generated", { executionTime, model });
+      logger.info("OpenRouter recommendation generated", { executionTime, model });
 
       // Create or get authors
       logger.info("Processing authors", { authorCount: result.book.authors.length });
-      const authorIds = await Promise.all(
-        result.book.authors.map(async (author) => {
-          logger.info("Processing author", { authorName: author.name });
-          const { data: existingAuthor } = await this.supabase
-            .from("authors")
-            .select()
-            .eq("name", author.name)
-            .single();
 
-          if (existingAuthor) {
-            logger.info("Found existing author", { authorId: existingAuthor.id, authorName: author.name });
-            return existingAuthor.id;
-          }
+      // Process authors sequentially to avoid race conditions
+      const bookAuthorIds: string[] = [];
+      for (const author of result.book.authors) {
+        logger.info("Processing author", { authorName: author.name });
 
-          logger.info("Creating new author", { authorName: author.name });
-          const { data: newAuthor } = await this.supabase
+        // Check if author already exists
+        const { data: existingAuthor } = await this.supabase
+          .from("authors")
+          .select("id")
+          .ilike("name", author.name)
+          .maybeSingle();
+
+        if (existingAuthor) {
+          logger.info("Author already exists", { authorId: existingAuthor.id, name: author.name });
+          bookAuthorIds.push(existingAuthor.id);
+        } else {
+          // Create new author
+          logger.info("Creating new author", { name: author.name });
+          const { data: newAuthor, error } = await this.supabase
             .from("authors")
             .insert({ name: author.name })
-            .select()
+            .select("id")
             .single();
 
-          if (!newAuthor) {
-            logger.error("Failed to create author", { authorName: author.name });
-            throw new Error(`Failed to create author: ${author.name}`);
+          if (error) {
+            logger.error("Failed to create author", { error, name: author.name });
+            throw new Error(`Failed to create author: ${error.message}`);
           }
 
-          logger.info("Created new author", { authorId: newAuthor.id, authorName: author.name });
-          return newAuthor.id;
-        })
-      );
-      logger.info("Authors processed", { authorIds });
-
-      // Create or get book
-      logger.info("Processing book", { bookTitle: result.book.title });
-      const { data: existingBook } = await this.supabase.from("books").select().eq("title", result.book.title).single();
-
-      let bookId: string;
-
-      if (existingBook) {
-        logger.info("Found existing book", { bookId: existingBook.id, bookTitle: result.book.title });
-        bookId = existingBook.id;
-      } else {
-        logger.info("Creating new book", { bookTitle: result.book.title });
-        const { data: newBook, error: newBookError } = await this.supabase
-          .from("books")
-          .insert({
-            title: result.book.title,
-            language: result.book.language,
-          })
-          .select()
-          .single();
-
-        if (newBookError) {
-          logger.error("Failed to create book", {
-            error: newBookError.message,
-            details: newBookError.details,
-            hint: newBookError.hint,
-            bookTitle: result.book.title,
-          });
-          throw new Error(`Failed to create book: ${newBookError.message}`);
+          logger.info("New author created", { authorId: newAuthor.id, name: author.name });
+          bookAuthorIds.push(newAuthor.id);
         }
-
-        if (!newBook) {
-          logger.error("Failed to create book - no data returned", { bookTitle: result.book.title });
-          throw new Error("Failed to create book - no data returned");
-        }
-
-        bookId = newBook.id;
-        logger.info("Created new book", { bookId, bookTitle: result.book.title });
-
-        // Create book-author relationships
-        logger.info("Creating book-author relationships", { bookId, authorIds });
-        const { error: relationshipError } = await this.supabase.from("book_authors").insert(
-          authorIds.map((authorId) => ({
-            book_id: bookId,
-            author_id: authorId,
-          }))
-        );
-
-        if (relationshipError) {
-          logger.error("Failed to create book-author relationships", {
-            error: relationshipError.message,
-            details: relationshipError.details,
-            hint: relationshipError.hint,
-            bookId,
-            authorIds,
-          });
-          throw new Error(`Failed to create book-author relationships: ${relationshipError.message}`);
-        }
-        logger.info("Book-author relationships created successfully");
       }
 
+      // Create book
+      logger.info("Creating book", { title: result.book.title });
+      const { data: newBook, error: bookError } = await this.supabase
+        .from("books")
+        .insert({
+          title: result.book.title,
+          language: result.book.language,
+        })
+        .select("id")
+        .single();
+
+      if (bookError) {
+        logger.error("Failed to create book", { error: bookError, title: result.book.title });
+        throw new Error(`Failed to create book: ${bookError.message}`);
+      }
+
+      logger.info("New book created", { bookId: newBook.id, title: result.book.title });
+
+      // Create book-author relationships
+      logger.info("Creating book-author relationships");
+      const bookAuthorRelations = bookAuthorIds.map((authorId) => ({
+        book_id: newBook.id,
+        author_id: authorId,
+      }));
+
+      const { error: relationError } = await this.supabase.from("book_authors").insert(bookAuthorRelations);
+
+      if (relationError) {
+        logger.error("Failed to create book-author relationships", { error: relationError, bookId: newBook.id });
+        throw new Error(`Failed to create book-author relationships: ${relationError.message}`);
+      }
+
+      logger.info("Book-author relationships created", { count: bookAuthorIds.length });
+
       // Create recommendation
-      logger.info("Creating recommendation", { bookId });
-      const { data: recommendation, error: recommendationError } = await this.supabase
+      logger.info("Creating recommendation");
+      const { data: newRecommendation, error: recommendationError } = await this.supabase
         .from("recommendations")
         .insert({
           user_id: DEFAULT_USER_ID,
-          book_id: bookId,
+          book_id: newBook.id,
           plot_summary: result.plot_summary,
           rationale: result.rationale,
           ai_model: model,
           execution_time: executionTime,
           status: RecommendationStatus.PENDING,
         })
-        .select(
-          `
-          id,
-          book:books!inner (
-            id,
-            title,
-            language,
-            authors:book_authors!inner (
-              author:authors!inner (
-                id,
-                name
-              )
-            )
-          ),
-          plot_summary,
-          rationale,
-          ai_model,
-          execution_time,
-          status,
-          created_at,
-          updated_at
-        `
-        )
+        .select("id")
         .single();
 
       if (recommendationError) {
-        logger.error("Failed to create recommendation", {
-          error: recommendationError.message,
-          details: recommendationError.details,
-          hint: recommendationError.hint,
-          bookId,
-        });
+        logger.error("Failed to create recommendation", { error: recommendationError, bookId: newBook.id });
         throw new Error(`Failed to create recommendation: ${recommendationError.message}`);
       }
 
-      if (!recommendation) {
-        logger.error("Failed to create recommendation - no data returned", { bookId });
-        throw new Error("Failed to create recommendation - no data returned");
-      }
+      logger.info("New recommendation created", { recommendationId: newRecommendation.id });
 
-      logger.info("Recommendation created successfully", { recommendationId: recommendation.id });
-
-      // Transform the response to match DTO structure
-      const response = {
-        id: recommendation.id,
+      // Build and return response DTO
+      return {
+        id: newRecommendation.id,
         book: {
-          id: recommendation.book.id,
-          title: recommendation.book.title,
-          language: recommendation.book.language,
-          authors: recommendation.book.authors.map((ba: BookAuthor) => ({
-            id: ba.author.id,
-            name: ba.author.name,
+          id: newBook.id,
+          title: result.book.title,
+          language: result.book.language,
+          authors: result.book.authors.map((author, index) => ({
+            id: bookAuthorIds[index],
+            name: author.name,
           })),
         },
-        plot_summary: recommendation.plot_summary,
-        rationale: recommendation.rationale,
-        ai_model: recommendation.ai_model,
-        execution_time: parseExecutionTime(recommendation.execution_time),
-        status: recommendation.status,
-        created_at: new Date(recommendation.created_at).toISOString(),
-        updated_at: recommendation.updated_at ? new Date(recommendation.updated_at).toISOString() : undefined,
+        plot_summary: result.plot_summary,
+        rationale: result.rationale,
+        ai_model: model,
+        execution_time: executionTime,
+        status: RecommendationStatus.PENDING,
+        created_at: new Date().toISOString(),
       };
-
-      logger.info("Recommendation generation completed successfully", { recommendationId: response.id });
-      return response;
     } catch (error) {
-      logger.error("Error in recommendation generation", {
+      logger.error("Failed to generate recommendation", {
         error: error instanceof Error ? error.message : "Unknown error",
         stack: error instanceof Error ? error.stack : undefined,
       });

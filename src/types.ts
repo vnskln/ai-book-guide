@@ -141,8 +141,8 @@ export interface RecommendationResponseDto {
     language: string;
     authors: AuthorDto[];
   };
-  plot_summary: string; // Not in DB schema but in API plan
-  rationale: string; // Not in DB schema but in API plan
+  plot_summary: string;
+  rationale: string;
   ai_model: string;
   execution_time: number;
   status: RecommendationStatus;
@@ -160,6 +160,19 @@ export type RecommendationPaginatedResponseDto = PaginatedResponse<Recommendatio
  */
 export interface UpdateRecommendationStatusDto {
   status: RecommendationStatus;
+}
+
+/**
+ * Result from OpenRouter API for book recommendations
+ */
+export interface RecommendationResult {
+  book: {
+    title: string;
+    language: string;
+    authors: AuthorDto[];
+  };
+  plot_summary: string;
+  rationale: string;
 }
 
 // Book-Author relationship types
@@ -190,4 +203,5 @@ export enum RecommendationStatus {
   PENDING = "pending",
   ACCEPTED = "accepted",
   REJECTED = "rejected",
+  NEW = "new",
 }
