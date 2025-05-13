@@ -1,6 +1,7 @@
 ---
 import Layout from "./Layout.astro";
 import { UserHeader } from "@/components/UserHeader";
+import { Container } from "@/components/ui/container";
 
 interface Props {
   title: string;
@@ -11,9 +12,9 @@ const userEmail = Astro.locals.user?.email || "";
 ---
 
 <Layout title={title}>
-  <div class="container py-8 space-y-8">
+  <Container className="py-8 space-y-8">
     <UserHeader client:load email={userEmail} />
     <h1 class="text-3xl font-bold tracking-tight text-center">{title}</h1>
     <slot />
-  </div>
+  </Container>
 </Layout>

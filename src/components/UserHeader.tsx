@@ -26,7 +26,7 @@ export function UserHeader({ email }: UserHeaderProps) {
   };
 
   return (
-    <div className="flex justify-end items-center gap-4 mb-4 px-4">
+    <div className="flex justify-end items-center gap-4 mb-4">
       <span className="text-sm text-muted-foreground">{email}</span>
       <Button variant="outline" size="sm" onClick={handleLogout}>
         <LogOut className="h-4 w-4 mr-2" />

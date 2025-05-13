@@ -17,7 +17,7 @@ export function CurrentRecommendation({
   isActionLoading,
 }: CurrentRecommendationProps) {
   return (
-    <div className="space-y-4 px-4">
+    <div className="space-y-4">
       <RecommendationCard recommendation={recommendation} />
 
       <div className="flex justify-center gap-4">

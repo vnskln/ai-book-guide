@@ -6,6 +6,7 @@ import { CurrentRecommendation } from "./CurrentRecommendation";
 import { RecommendationHistory } from "./RecommendationHistory";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { Button } from "@/components/ui/button";
+import { Container } from "@/components/ui/container";
 import { BookOpen } from "lucide-react";
 import { GearIcon } from "@radix-ui/react-icons";
 import { UserHeader } from "./UserHeader";
@@ -26,7 +27,7 @@ function RecommendationsPageContent({ userEmail }: RecommendationsPageProps) {
   } = useRecommendations();
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <Container className="py-8">
       <UserHeader email={userEmail} />
       <div className="space-y-8">
         <section className="text-center">
@@ -77,7 +78,7 @@ function RecommendationsPageContent({ userEmail }: RecommendationsPageProps) {
 
         <RecommendationHistory history={viewState.history} onPageChange={fetchHistory} />
       </div>
-    </main>
+    </Container>
   );
 }
 
