@@ -19,15 +19,15 @@ export function ResetPasswordForm() {
     return (
       <Card className="w-full max-w-md mx-auto">
         <CardHeader>
-          <CardTitle>Sprawdź swoją skrzynkę</CardTitle>
+          <CardTitle>Check Your Email</CardTitle>
           <CardDescription>
-            Wysłaliśmy link do resetowania hasła na podany adres email. Sprawdź swoją skrzynkę i kliknij w link aby
-            zresetować hasło.
+            We've sent a password reset link to your email address. Please check your inbox and click the link to reset
+            your password.
           </CardDescription>
         </CardHeader>
         <CardFooter className="pt-6">
           <Button variant="outline" className="w-full" onClick={() => (window.location.href = "/login")}>
-            Powrót do logowania
+            Back to Sign In
           </Button>
         </CardFooter>
       </Card>
@@ -37,8 +37,8 @@ export function ResetPasswordForm() {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>Resetowanie hasła</CardTitle>
-        <CardDescription>Podaj swój adres email, a wyślemy Ci link do zresetowania hasła</CardDescription>
+        <CardTitle>Reset Password</CardTitle>
+        <CardDescription>Enter your email address and we'll send you a link to reset your password</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
@@ -52,7 +52,7 @@ export function ResetPasswordForm() {
             <Input
               id="email"
               type="email"
-              placeholder="twoj@email.com"
+              placeholder="your@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -61,11 +61,11 @@ export function ResetPasswordForm() {
         </CardContent>
         <CardFooter className="flex flex-col space-y-4 pt-6">
           <Button type="submit" className="w-full">
-            Wyślij link resetujący
+            Send Reset Link
           </Button>
           <p className="text-sm text-center">
             <a href="/login" className="text-primary hover:underline">
-              Powrót do logowania
+              Back to Sign In
             </a>
           </p>
         </CardFooter>

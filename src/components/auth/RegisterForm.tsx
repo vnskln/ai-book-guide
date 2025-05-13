@@ -19,8 +19,8 @@ export function RegisterForm() {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>Zarejestruj się</CardTitle>
-        <CardDescription>Stwórz konto aby otrzymywać spersonalizowane rekomendacje książek</CardDescription>
+        <CardTitle>Sign Up</CardTitle>
+        <CardDescription>Create an account to receive personalized book recommendations</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
@@ -34,14 +34,14 @@ export function RegisterForm() {
             <Input
               id="email"
               type="email"
-              placeholder="twoj@email.com"
+              placeholder="your@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Hasło</Label>
+            <Label htmlFor="password">Password</Label>
             <Input
               id="password"
               type="password"
@@ -50,11 +50,11 @@ export function RegisterForm() {
               required
             />
             <p className="text-sm text-muted-foreground">
-              Hasło musi mieć minimum 8 znaków i zawierać cyfry oraz znaki specjalne
+              Password must be at least 8 characters long and contain numbers and special characters
             </p>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="passwordConfirmation">Potwierdź hasło</Label>
+            <Label htmlFor="passwordConfirmation">Confirm Password</Label>
             <Input
               id="passwordConfirmation"
               type="password"
@@ -66,12 +66,12 @@ export function RegisterForm() {
         </CardContent>
         <CardFooter className="flex flex-col space-y-4 pt-6">
           <Button type="submit" className="w-full">
-            Zarejestruj się
+            Sign Up
           </Button>
           <p className="text-sm text-center">
-            Masz już konto?{" "}
+            Already have an account?{" "}
             <a href="/login" className="text-primary hover:underline">
-              Zaloguj się
+              Sign In
             </a>
           </p>
         </CardFooter>

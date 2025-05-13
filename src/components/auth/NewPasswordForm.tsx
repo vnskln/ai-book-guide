@@ -18,8 +18,8 @@ export function NewPasswordForm() {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>Ustaw nowe hasło</CardTitle>
-        <CardDescription>Wprowadź nowe hasło dla swojego konta</CardDescription>
+        <CardTitle>Set New Password</CardTitle>
+        <CardDescription>Enter a new password for your account</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
@@ -29,7 +29,7 @@ export function NewPasswordForm() {
             </Alert>
           )}
           <div className="space-y-2">
-            <Label htmlFor="password">Nowe hasło</Label>
+            <Label htmlFor="password">New Password</Label>
             <Input
               id="password"
               type="password"
@@ -38,11 +38,11 @@ export function NewPasswordForm() {
               required
             />
             <p className="text-sm text-muted-foreground">
-              Hasło musi mieć minimum 8 znaków i zawierać cyfry oraz znaki specjalne
+              Password must be at least 8 characters long and contain numbers and special characters
             </p>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="passwordConfirmation">Potwierdź nowe hasło</Label>
+            <Label htmlFor="passwordConfirmation">Confirm New Password</Label>
             <Input
               id="passwordConfirmation"
               type="password"
@@ -54,7 +54,7 @@ export function NewPasswordForm() {
         </CardContent>
         <CardFooter className="pt-6">
           <Button type="submit" className="w-full">
-            Ustaw nowe hasło
+            Set New Password
           </Button>
         </CardFooter>
       </form>
