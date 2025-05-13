@@ -38,7 +38,7 @@ export function RecommendationHistory({ history, onPageChange }: RecommendationH
   }
 
   return (
-    <section className="space-y-6" aria-label="Recommendation history">
+    <section className="space-y-6 px-4" aria-label="Recommendation history">
       <div>
         <h2 className="text-2xl font-semibold">History</h2>
         <p className="text-sm text-gray-500 mt-1">Click on any recommendation to view its full details</p>
