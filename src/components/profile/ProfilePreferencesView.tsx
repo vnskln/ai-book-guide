@@ -27,14 +27,14 @@ export function ProfilePreferencesView() {
   };
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="max-w-3xl mx-auto">
+      <CardHeader className="px-6">
         <CardTitle>Reading Preferences</CardTitle>
         <CardDescription>
           Update your reading preferences and preferred language. This will help us provide better book recommendations.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <PreferencesTextarea
             value={data.reading_preferences}

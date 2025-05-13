@@ -1,7 +1,7 @@
 import React from "react";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
-import { LightningBoltIcon, PlusIcon } from "@radix-ui/react-icons";
+import { LightningBoltIcon, PlusIcon, GearIcon } from "@radix-ui/react-icons";
 
 interface MyBooksLayoutProps {
   title: string;
@@ -38,6 +38,12 @@ export function MyBooksLayout({ title, children }: MyBooksLayoutProps) {
                 Add Book
               </Button>
             )}
+            <Button variant="outline" size="sm" asChild className="border-muted-foreground flex items-center gap-2">
+              <a href="/profile/preferences">
+                <GearIcon className="h-4 w-4" />
+                Settings
+              </a>
+            </Button>
             <Button variant="outline" size="sm" asChild className="border-muted-foreground flex items-center gap-2">
               <a href="/recommendations">
                 <LightningBoltIcon className="h-4 w-4" />

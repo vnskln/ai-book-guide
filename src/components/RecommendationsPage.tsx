@@ -7,6 +7,7 @@ import { RecommendationHistory } from "./RecommendationHistory";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
+import { GearIcon } from "@radix-ui/react-icons";
 
 function RecommendationsPageContent() {
   const {
@@ -25,6 +26,15 @@ function RecommendationsPageContent() {
         <section className="text-center">
           <h1 className="text-4xl font-bold mb-8">Book Recommendations</h1>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full max-w-md"
+              onClick={() => (window.location.href = "/my-books/read")}
+            >
+              <BookOpen className="mr-2 h-4 w-4" />
+              View my book lists
+            </Button>
             <RecommendationButton
               onClick={generateRecommendation}
               isLoading={viewState.status === RecommendationViewStatus.LOADING}
@@ -34,10 +44,10 @@ function RecommendationsPageContent() {
               variant="outline"
               size="lg"
               className="w-full max-w-md"
-              onClick={() => (window.location.href = "/my-books/read")}
+              onClick={() => (window.location.href = "/profile/preferences")}
             >
-              <BookOpen className="mr-2 h-4 w-4" />
-              View my book lists
+              <GearIcon className="mr-2 h-4 w-4" />
+              Settings
             </Button>
           </div>
         </section>
