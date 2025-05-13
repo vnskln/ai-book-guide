@@ -91,12 +91,12 @@ User preferences: ${userPreferences}
 User preferred language for books: ${preferredLanguage}
 
 Provide recommendations that align with these preferences while avoiding books the user has already read, rejected, or added to their to-read list.
+Pay special attention to the user's book ratings - books marked as "liked" indicate preferences you should consider, while "disliked" books should guide you away from similar titles or styles.
 Your recommendation should be thoughtful and include a compelling rationale.
 Do not suggest books that the user has already mentioned in any category.
 
 IMPORTANT LANGUAGE REQUIREMENTS:
 - Always provide the book title in the user's preferred language (${preferredLanguage}).
-- If the book was originally written in another language, you may include the original title in parentheses.
 - The plot summary and rationale MUST be written in English, regardless of the book's language.
 - Make sure to set the language field in your response to match the user's preferred language.`;
   }
@@ -121,7 +121,15 @@ IMPORTANT LANGUAGE REQUIREMENTS:
       message += "\n\nBooks I've already read:";
       readBooks.forEach((book) => {
         const authorNames = book.authors?.map((author: AuthorDto) => author.name).join(", ") || "Unknown author";
-        message += `\n- "${book.title}" by ${authorNames}`;
+        // Add rating information to read books if available
+        const ratingInfo = book.hasOwnProperty("rating")
+          ? book.rating === true
+            ? " (liked)"
+            : book.rating === false
+              ? " (disliked)"
+              : ""
+          : "";
+        message += `\n- "${book.title}" by ${authorNames}${ratingInfo}`;
       });
     }
 

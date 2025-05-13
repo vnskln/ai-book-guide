@@ -126,7 +126,10 @@ export class RecommendationsService {
 
       // Get user's read books
       logger.info("Fetching user's read books");
-      const { data: readBooksIds } = await this.supabase.from("user_books").select("book_id").eq("status", "read");
+      const { data: readBooksIds } = await this.supabase
+        .from("user_books")
+        .select("book_id, rating")
+        .eq("status", "read");
       logger.info("Read books found", { count: readBooksIds?.length || 0 });
 
       // Get user's rejected books
@@ -180,12 +183,16 @@ export class RecommendationsService {
               }
             });
 
+            // Find the corresponding user_book record to get the rating
+            const userBook = readBooksIds?.find((b) => b.book_id === book.id);
+
             readBooks.push({
               id: book.id,
               title: book.title,
               language: book.language,
               created_at: book.created_at,
               authors: bookAuthors,
+              rating: userBook?.rating,
             });
           });
         }

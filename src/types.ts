@@ -66,6 +66,7 @@ export interface BookWithAuthorsDto {
   language: string;
   authors: AuthorDto[];
   created_at: string;
+  rating?: boolean | null;
 }
 
 /**
