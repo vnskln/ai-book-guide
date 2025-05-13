@@ -1,6 +1,5 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { DEFAULT_USER_ID } from "@/db/supabase.client";
 import type { UpdateUserPreferencesDto } from "@/types";
 import { logger } from "@/lib/utils/logger";
 
@@ -15,8 +14,16 @@ const updatePreferencesSchema = z.object({
 export const prerender = false;
 
 export const GET: APIRoute = async ({ locals }) => {
+  if (!locals.user) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
+
   try {
-    const { data: preferences, error } = await locals.supabase.from("user_preferences").select("*").single();
+    const { data: preferences, error } = await locals.supabase
+      .from("user_preferences")
+      .select("*")
+      .eq("user_id", locals.user.id)
+      .single();
 
     if (error) {
       logger.error("Failed to fetch preferences:", { error });
@@ -37,6 +44,10 @@ export const GET: APIRoute = async ({ locals }) => {
 };
 
 export const PUT: APIRoute = async ({ request, locals }) => {
+  if (!locals.user) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
+
   try {
     const body = (await request.json()) as UpdateUserPreferencesDto;
 
@@ -67,7 +78,7 @@ export const PUT: APIRoute = async ({ request, locals }) => {
         preferred_language: body.preferred_language,
         updated_at: new Date().toISOString(),
       })
-      .eq("user_id", DEFAULT_USER_ID)
+      .eq("user_id", locals.user.id)
       .select()
       .single();
 
@@ -96,6 +107,10 @@ export const PUT: APIRoute = async ({ request, locals }) => {
 };
 
 export const POST: APIRoute = async ({ request, locals }) => {
+  if (!locals.user) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
+
   try {
     const body = (await request.json()) as UpdateUserPreferencesDto;
 
@@ -117,11 +132,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const { data: existingPreferences } = await locals.supabase
       .from("user_preferences")
       .select()
-      .eq("user_id", DEFAULT_USER_ID)
+      .eq("user_id", locals.user.id)
       .single();
 
     if (existingPreferences) {
-      logger.warn("Preferences already exist for user:", { userId: DEFAULT_USER_ID });
+      logger.warn("Preferences already exist for user:", { userId: locals.user.id });
       return new Response(
         JSON.stringify({
           error: {
@@ -143,7 +158,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       .from("user_preferences")
       .insert([
         {
-          user_id: DEFAULT_USER_ID,
+          user_id: locals.user.id,
           reading_preferences: body.reading_preferences,
           preferred_language: body.preferred_language,
           created_at: new Date().toISOString(),

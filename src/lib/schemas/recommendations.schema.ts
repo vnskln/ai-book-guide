@@ -53,8 +53,14 @@ export const paginatedRecommendationResponseSchema = z.object({
 export type RecommendationQuery = z.infer<typeof recommendationQuerySchema>;
 export type PaginatedRecommendationResponse = z.infer<typeof paginatedRecommendationResponseSchema>;
 
+// Schema for updating recommendation status
 export const updateRecommendationStatusSchema = z.object({
-  status: z.enum([RecommendationStatus.ACCEPTED, RecommendationStatus.REJECTED]),
+  id: z.string().uuid(),
+  status: z
+    .nativeEnum(RecommendationStatus)
+    .refine((val) => val === RecommendationStatus.ACCEPTED || val === RecommendationStatus.REJECTED, {
+      message: "Status must be either 'accepted' or 'rejected'",
+    }),
 });
 
 export type UpdateRecommendationStatus = z.infer<typeof updateRecommendationStatusSchema>;

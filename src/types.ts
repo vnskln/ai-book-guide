@@ -211,7 +211,7 @@ export enum RecommendationStatus {
 declare module "astro" {
   interface Locals {
     supabase: SupabaseClient;
-    user?: {
+    user: {
       id: string;
       email: string | undefined;
     };

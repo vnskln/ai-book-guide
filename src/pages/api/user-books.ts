@@ -1,7 +1,6 @@
 import type { APIRoute } from "astro";
 import { createUserBookSchema, updateUserBookSchema } from "../../lib/schemas/user-books.schema";
 import { UserBooksService } from "../../lib/services/user-books.service";
-import { DEFAULT_USER_ID } from "../../db/supabase.client";
 import { getUserBooksQuerySchema } from "../../lib/schemas/user-books.schema";
 import { BadRequestError, NotFoundError, ForbiddenError } from "../../lib/errors/http";
 import { logger } from "../../lib/utils/logger";
@@ -13,6 +12,10 @@ const JSON_RESPONSE_HEADERS = {
 };
 
 export const POST: APIRoute = async ({ request, locals }) => {
+  if (!locals.user) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
+
   try {
     // Parse and validate request body
     const body = await request.json();
@@ -33,7 +36,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // Create user book
     const userBooksService = new UserBooksService(locals.supabase);
-    const result = await userBooksService.createUserBook(DEFAULT_USER_ID, validationResult.data);
+    const result = await userBooksService.createUserBook(locals.user.id, validationResult.data);
 
     return new Response(JSON.stringify(result), {
       status: 201,
@@ -66,10 +69,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
 };
 
 export const GET: APIRoute = async ({ request, locals }) => {
-  try {
-    // Use DEFAULT_USER_ID instead of checking auth
-    const userId = DEFAULT_USER_ID;
+  if (!locals.user) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
 
+  try {
     // Parse and validate query parameters
     const url = new URL(request.url);
     const queryParams = {
@@ -90,7 +94,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
 
     // Get user books through service
     const userBooksService = new UserBooksService(locals.supabase);
-    const userBooks = await userBooksService.getUserBooks(userId, validationResult.data);
+    const userBooks = await userBooksService.getUserBooks(locals.user.id, validationResult.data);
 
     // Return successful response
     return new Response(JSON.stringify(userBooks), {
@@ -121,6 +125,10 @@ export const GET: APIRoute = async ({ request, locals }) => {
 };
 
 export const PUT: APIRoute = async ({ request, locals }) => {
+  if (!locals.user) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
+
   try {
     // Extract book ID from URL
     const url = new URL(request.url);
@@ -141,7 +149,7 @@ export const PUT: APIRoute = async ({ request, locals }) => {
 
     // Update book using service
     const userBooksService = new UserBooksService(locals.supabase);
-    const updatedBook = await userBooksService.updateUserBook(DEFAULT_USER_ID, id, validationResult.data);
+    const updatedBook = await userBooksService.updateUserBook(locals.user.id, id, validationResult.data);
 
     return new Response(JSON.stringify(updatedBook), {
       status: 200,
@@ -178,6 +186,10 @@ export const PUT: APIRoute = async ({ request, locals }) => {
 };
 
 export const DELETE: APIRoute = async ({ request, locals }) => {
+  if (!locals.user) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
+
   try {
     // Extract book ID from URL
     const url = new URL(request.url);
@@ -191,7 +203,7 @@ export const DELETE: APIRoute = async ({ request, locals }) => {
     }
 
     const userBooksService = new UserBooksService(locals.supabase);
-    await userBooksService.deleteUserBook(DEFAULT_USER_ID, id);
+    await userBooksService.deleteUserBook(locals.user.id, id);
 
     // Return 204 No Content for successful deletion
     return new Response(null, { status: 204 });

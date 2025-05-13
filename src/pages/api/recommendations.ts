@@ -8,7 +8,6 @@ import {
 } from "../../lib/schemas/recommendations.schema";
 import { RecommendationStatus, UserBookStatus } from "../../types";
 import { logger } from "../../lib/utils/logger";
-import { DEFAULT_USER_ID } from "../../db/supabase.client";
 
 export const prerender = false;
 
@@ -49,6 +48,10 @@ export const POST: APIRoute = async ({ locals }) => {
 
 export const GET: APIRoute = async ({ request, locals }) => {
   try {
+    if (!locals.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    }
+
     // Extract query parameters
     const url = new URL(request.url);
     const params = {
@@ -86,9 +89,9 @@ export const GET: APIRoute = async ({ request, locals }) => {
 
     const { status, page, limit } = result.data;
 
-    // Initialize service and fetch recommendations using DEFAULT_USER_ID
+    // Initialize service and fetch recommendations using authenticated user ID
     const recommendationsService = new RecommendationsService(locals.supabase);
-    const recommendations = await recommendationsService.getRecommendations(DEFAULT_USER_ID, status, page, limit);
+    const recommendations = await recommendationsService.getRecommendations(locals.user.id, status, page, limit);
 
     // Return successful response
     return new Response(JSON.stringify(recommendations), {
@@ -98,13 +101,11 @@ export const GET: APIRoute = async ({ request, locals }) => {
       },
     });
   } catch (error) {
-    // Log error details
-    logger.error("Error in recommendations endpoint", {
+    logger.error("Error fetching recommendations", {
       error: error instanceof Error ? error.message : "Unknown error",
       stack: error instanceof Error ? error.stack : undefined,
     });
 
-    // Return error response
     return new Response(
       JSON.stringify({
         error: "Internal server error",
@@ -119,39 +120,22 @@ export const GET: APIRoute = async ({ request, locals }) => {
     );
   }
 };
+
 export const PUT: APIRoute = async ({ request, locals }) => {
+  if (!locals.user) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
+
   try {
-    // Extract recommendation ID from URL
-    const url = new URL(request.url);
-    const id = url.searchParams.get("id");
-    if (!id) {
-      return new Response(
-        JSON.stringify({
-          error: "Bad Request",
-          details: "Recommendation ID is required",
-        }),
-        {
-          status: 400,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
-
     // Parse and validate request body
-    let requestBody;
-    try {
-      requestBody = await request.json();
-    } catch (error) {
-      logger.warn("Invalid JSON in request body", {
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
+    const body = await request.json();
+    const validationResult = updateRecommendationStatusSchema.safeParse(body);
 
+    if (!validationResult.success) {
       return new Response(
         JSON.stringify({
-          error: "Bad Request",
-          details: "Invalid JSON in request body",
+          error: "Invalid request body",
+          details: validationResult.error.format(),
         }),
         {
           status: 400,
@@ -162,47 +146,20 @@ export const PUT: APIRoute = async ({ request, locals }) => {
       );
     }
 
-    // Validate request body against schema
-    const result = updateRecommendationStatusSchema.safeParse(requestBody);
-    if (!result.success) {
-      logger.warn("Invalid request body", {
-        errors: result.error.format(),
-        body: requestBody,
-      });
-
-      return new Response(
-        JSON.stringify({
-          error: "Bad Request",
-          details: "Invalid request body",
-          validationErrors: result.error.format(),
-        }),
-        {
-          status: 400,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
-
-    const { status } = result.data;
+    const { id, status } = validationResult.data;
 
     // Initialize services
     const recommendationsService = new RecommendationsService(locals.supabase);
 
     try {
       // Update recommendation status
-      const updatedRecommendation = await recommendationsService.updateRecommendationStatus(
-        id,
-        DEFAULT_USER_ID,
-        status
-      );
+      const updatedRecommendation = await recommendationsService.updateRecommendationStatus(id, locals.user.id, status);
 
       // Create user book entry for both accepted and rejected recommendations
       try {
         const userBooksService = new UserBooksService(locals.supabase);
         if (status === RecommendationStatus.ACCEPTED) {
-          await userBooksService.createUserBookFromRecommendation(DEFAULT_USER_ID, id);
+          await userBooksService.createUserBookFromRecommendation(locals.user.id, id);
         } else if (status === RecommendationStatus.REJECTED) {
           // Get book details from recommendation
           const { data: recommendation } = await locals.supabase
@@ -212,7 +169,7 @@ export const PUT: APIRoute = async ({ request, locals }) => {
             .single();
 
           if (recommendation) {
-            await userBooksService.createUserBook(DEFAULT_USER_ID, {
+            await userBooksService.createUserBook(locals.user.id, {
               book: {
                 title: recommendation.books.title,
                 language: recommendation.books.language,
@@ -231,7 +188,7 @@ export const PUT: APIRoute = async ({ request, locals }) => {
           error: error instanceof Error ? error.message : "Unknown error",
           stack: error instanceof Error ? error.stack : undefined,
           recommendationId: id,
-          userId: DEFAULT_USER_ID,
+          userId: locals.user.id,
         });
       }
 
@@ -280,7 +237,7 @@ export const PUT: APIRoute = async ({ request, locals }) => {
         error: error instanceof Error ? error.message : "Unknown error",
         stack: error instanceof Error ? error.stack : undefined,
         id,
-        userId: DEFAULT_USER_ID,
+        userId: locals.user.id,
         status,
       });
 
@@ -299,8 +256,7 @@ export const PUT: APIRoute = async ({ request, locals }) => {
       );
     }
   } catch (error) {
-    // Catch any unexpected errors
-    logger.error("Unexpected error in recommendation status update endpoint", {
+    logger.error("Error processing recommendation update", {
       error: error instanceof Error ? error.message : "Unknown error",
       stack: error instanceof Error ? error.stack : undefined,
     });
