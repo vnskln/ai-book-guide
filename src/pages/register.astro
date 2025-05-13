@@ -1,0 +1,11 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import AuthLayout from "@/components/auth/AuthLayout.astro";
+import { RegisterForm } from "@/components/auth/RegisterForm";
+---
+
+<Layout title="AI Book Guide - Rejestracja">
+  <AuthLayout>
+    <RegisterForm client:load />
+  </AuthLayout>
+</Layout>

@@ -1,0 +1,11 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import AuthLayout from "@/components/auth/AuthLayout.astro";
+import { LoginForm } from "@/components/auth/LoginForm";
+---
+
+<Layout title="AI Book Guide - Twój osobisty przewodnik po książkach">
+  <AuthLayout>
+    <LoginForm client:load />
+  </AuthLayout>
+</Layout>
