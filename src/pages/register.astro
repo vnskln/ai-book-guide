@@ -1,11 +1,19 @@
 ---
-import Layout from "@/layouts/Layout.astro";
-import AuthLayout from "@/components/auth/AuthLayout.astro";
-import { RegisterForm } from "@/components/auth/RegisterForm";
+import Layout from "../layouts/Layout.astro";
+import { RegisterForm } from "../components/auth/RegisterForm";
+
+// Redirect if user is already logged in
+const { cookies, redirect } = Astro;
+const accessToken = cookies.get("sb-access-token");
+const refreshToken = cookies.get("sb-refresh-token");
+
+if (accessToken && refreshToken) {
+  return redirect("/recommendations");
+}
 ---
 
-<Layout title="AI Book Guide - Rejestracja">
-  <AuthLayout>
+<Layout title="Sign Up - AI Book Guide">
+  <main class="container mx-auto px-4 py-8">
     <RegisterForm client:load />
-  </AuthLayout>
+  </main>
 </Layout>

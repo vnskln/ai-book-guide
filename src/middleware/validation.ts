@@ -1,6 +1,6 @@
 import type { APIContext } from "astro";
 import { ZodError, type AnyZodObject } from "zod";
-import { BadRequestError } from "../lib/errors";
+import { BadRequestError } from "../lib/errors/http";
 
 export async function validateRequest<T extends AnyZodObject>(request: Request, schema: T): Promise<T["_output"]> {
   try {
