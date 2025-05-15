@@ -114,7 +114,7 @@ This project is currently in active development. The core user authentication, b
 - Book recommendation system
 - Personalized reading lists (read, to-read, rejected)
 
-We are using Supabase for authentication and database management with a fully typed interface.
+We are local using Supabase for authentication and database management with a fully typed interface.
 
 ## License
 
