@@ -25,6 +25,11 @@ AI Book Guide is a smart book recommendation system powered by Claude 3.5 Sonnet
 - [Supabase](https://supabase.io/) - Backend-as-a-Service with PostgreSQL database
 - [OpenRouter.ai](https://openrouter.ai/) - API access to Claude 3.5 Sonnet and other AI models
 
+## Testing Stack
+- [Vitest](https://vitest.dev/) - Unit and integration testing framework
+- [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) - Testing React components
+- [Playwright](https://playwright.dev/) - End-to-end testing
+
 ## Getting Started Locally
 
 ### Prerequisites
@@ -74,6 +79,10 @@ http://localhost:3000
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Fix ESLint issues
 - `npm run format` - Format code with Prettier
+- `npm run test` - Run all tests
+- `npm run test:unit` - Run unit tests
+- `npm run test:integration` - Run integration tests
+- `npm run test:e2e` - Run end-to-end tests
 
 ## Project Scope
 
