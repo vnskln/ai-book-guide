@@ -9,7 +9,7 @@ export const POST: APIRoute = async ({ locals }) => {
     }
 
     return new Response(JSON.stringify({ message: "Logged out successfully" }), { status: 200 });
-  } catch (error) {
+  } catch {
     return new Response(JSON.stringify({ error: "Logout failed" }), { status: 500 });
   }
 };

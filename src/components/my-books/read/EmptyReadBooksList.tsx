@@ -15,7 +15,7 @@ export function EmptyReadBooksList({ onAddClick }: EmptyReadBooksListProps) {
           <ReaderIcon className="h-8 w-8 text-muted-foreground" />
         </div>
         <div className="space-y-2">
-          <h3 className="font-semibold">You haven't read any books yet</h3>
+          <h3 className="font-semibold">You haven&apos;t read any books yet</h3>
           <p className="text-sm text-muted-foreground">Add your first read book to start building your library</p>
         </div>
         <Button onClick={onAddClick} variant="secondary" className="mt-2">

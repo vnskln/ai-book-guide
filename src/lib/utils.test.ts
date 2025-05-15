@@ -8,8 +8,9 @@ describe("cn (class name utility)", () => {
 
   it("obsługuje warunkowe klasy", () => {
     const condition = true;
+    const falseCondition = false;
     expect(cn("base", condition ? "active" : "inactive")).toBe("base active");
-    expect(cn("base", false ? "active" : "inactive")).toBe("base inactive");
+    expect(cn("base", falseCondition ? "active" : "inactive")).toBe("base inactive");
   });
 
   it("deduplikuje nazwy klas", () => {

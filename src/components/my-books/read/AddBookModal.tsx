@@ -127,7 +127,7 @@ export function AddBookModal({ isOpen, onClose, onAdd }: AddBookModalProps) {
               </label>
               <label className="flex items-center gap-2">
                 <input type="radio" name="rating" value="false" required className="h-4 w-4" />
-                Don't Recommend
+                Don&apos;t Recommend
               </label>
             </div>
           </div>

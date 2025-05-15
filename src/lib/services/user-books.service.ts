@@ -437,7 +437,7 @@ export class UserBooksService {
       book_id: userBook.book_id,
       title: userBook.books.title,
       language: userBook.books.language,
-      authors: userBook.books.book_authors.map((ba: any) => ba.authors),
+      authors: userBook.books.book_authors.map((ba: BookAuthor) => ba.authors),
       status: userBook.status as UserBookStatus,
       is_recommended: userBook.is_recommended,
       rating: userBook.rating,

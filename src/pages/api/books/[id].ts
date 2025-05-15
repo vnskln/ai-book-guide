@@ -10,27 +10,28 @@ export const GET: APIRoute = async ({ params, locals }) => {
       });
     }
 
-    const { data, error } = await locals.supabase.from("books").select("*").eq("id", id).single();
+    const result = await locals.supabase.from("books").select("*").eq("id", id).single();
 
-    if (error) {
-      if (error.code === "PGRST116") {
+    if (result.error) {
+      if (result.error.code === "PGRST116") {
         return new Response(JSON.stringify({ error: "Book not found" }), {
           status: 404,
           headers: { "Content-Type": "application/json" },
         });
       }
-      return new Response(JSON.stringify({ error: error.message }), {
+      return new Response(JSON.stringify({ error: result.error.message }), {
         status: 500,
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    return new Response(JSON.stringify(data), {
+    return new Response(JSON.stringify(result.data), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (error) {
-    return new Response(JSON.stringify({ error: "Failed to fetch book" }), {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : "Failed to fetch book";
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
@@ -48,22 +49,22 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
     }
 
     const updates = await request.json();
+    const result = await locals.supabase.from("books").update(updates).eq("id", id).select();
 
-    const { data, error } = await locals.supabase.from("books").update(updates).eq("id", id).select();
-
-    if (error) {
-      return new Response(JSON.stringify({ error: error.message }), {
+    if (result.error) {
+      return new Response(JSON.stringify({ error: result.error.message }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    return new Response(JSON.stringify(data[0] || null), {
+    return new Response(JSON.stringify(result.data[0] || null), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (error) {
-    return new Response(JSON.stringify({ error: "Failed to update book" }), {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : "Failed to update book";
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
@@ -80,18 +81,19 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
       });
     }
 
-    const { error } = await locals.supabase.from("books").delete().eq("id", id);
+    const result = await locals.supabase.from("books").delete().eq("id", id);
 
-    if (error) {
-      return new Response(JSON.stringify({ error: error.message }), {
+    if (result.error) {
+      return new Response(JSON.stringify({ error: result.error.message }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
     }
 
     return new Response(null, { status: 204 });
-  } catch (error) {
-    return new Response(JSON.stringify({ error: "Failed to delete book" }), {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : "Failed to delete book";
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });

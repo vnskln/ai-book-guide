@@ -3,7 +3,7 @@ import type { APIContext } from "astro";
 
 // Mock the middleware validation
 vi.mock("../../../middleware/validation", () => ({
-  validateRequest: vi.fn((_, schema) => {
+  validateRequest: vi.fn(() => {
     return Promise.resolve({
       email: "new@example.com",
       password: "password123!",

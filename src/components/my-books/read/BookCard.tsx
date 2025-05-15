@@ -71,7 +71,7 @@ export function BookCard({ book, onDelete, onRatingChange }: BookCardProps) {
               disabled={isUpdatingRating}
             >
               <MinusCircledIcon className="mr-2 h-4 w-4" />
-              Don't Recommend
+              Don&apos;t Recommend
             </Button>
           </div>
         </CardFooter>

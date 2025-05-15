@@ -74,7 +74,7 @@ export const RatingModal = () => {
             className="flex-1"
             onClick={() => handleRatingSelect(false)}
           >
-            <ThumbsDown className="mr-2 h-4 w-4" />I didn't like it
+            <ThumbsDown className="mr-2 h-4 w-4" />I didn&apos;t like it
           </Button>
         </div>
         <DialogFooter>

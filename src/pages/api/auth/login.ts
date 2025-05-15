@@ -9,7 +9,7 @@ const loginSchema = z.object({
 
 export const prerender = false;
 
-export const POST: APIRoute = async ({ request, locals, cookies, redirect }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const { email, password } = await validateRequest(request, loginSchema);
 
@@ -24,6 +24,11 @@ export const POST: APIRoute = async ({ request, locals, cookies, redirect }) => 
 
     return new Response(JSON.stringify({ user: data.user }), { status: 200 });
   } catch (error) {
-    return new Response(JSON.stringify({ error: "Login failed" }), { status: 400 });
+    return new Response(
+      JSON.stringify({
+        error: error instanceof Error ? error.message : "Login failed",
+      }),
+      { status: 400 }
+    );
   }
 };

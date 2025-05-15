@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { APIContext } from "astro";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/db/database.types";
 
 // Mock data
 const mockBooks = [
@@ -22,7 +24,7 @@ vi.mock("@/db/supabase.server", () => ({
 
 // Direct import from local files instead of path aliases
 import { GET as getBooks, POST as createBook } from "../api/books/index";
-import { GET as getBook, PUT as updateBook, DELETE as deleteBook } from "../api/books/[id]";
+import { GET as getBook } from "../api/books/[id]";
 
 describe("Books API endpoints", () => {
   let mockContext: APIContext;
@@ -114,7 +116,7 @@ describe("Books API endpoints", () => {
             }),
           }),
         }),
-      }) as any;
+      }) as unknown as ReturnType<SupabaseClient<Database>["from"]>;
 
       const response = await getBook(mockContext);
       const data = await response.json();
@@ -135,7 +137,7 @@ describe("Books API endpoints", () => {
             }),
           }),
         }),
-      }) as any;
+      }) as unknown as ReturnType<SupabaseClient<Database>["from"]>;
 
       const response = await getBook(mockContext);
 
@@ -161,7 +163,7 @@ describe("Books API endpoints", () => {
             error: null,
           }),
         }),
-      }) as any;
+      }) as unknown as ReturnType<SupabaseClient<Database>["from"]>;
 
       const response = await createBook(mockContext);
       const data = await response.json();

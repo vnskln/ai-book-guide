@@ -2,21 +2,21 @@ import type { APIRoute } from "astro";
 
 export const GET: APIRoute = async ({ locals }) => {
   try {
-    const { data, error } = await locals.supabase.from("books").select("*");
-
-    if (error) {
-      return new Response(JSON.stringify({ error: error.message }), {
+    const result = await locals.supabase.from("books").select("*");
+    if (result.error) {
+      return new Response(JSON.stringify({ error: result.error.message }), {
         status: 500,
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    return new Response(JSON.stringify(data || []), {
+    return new Response(JSON.stringify(result.data || []), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (error) {
-    return new Response(JSON.stringify({ error: "Failed to fetch books" }), {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : "Failed to fetch books";
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
@@ -26,22 +26,22 @@ export const GET: APIRoute = async ({ locals }) => {
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const book = await request.json();
+    const result = await locals.supabase.from("books").insert(book).select();
 
-    const { data, error } = await locals.supabase.from("books").insert(book).select();
-
-    if (error) {
-      return new Response(JSON.stringify({ error: error.message }), {
+    if (result.error) {
+      return new Response(JSON.stringify({ error: result.error.message }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    return new Response(JSON.stringify(data[0] || null), {
+    return new Response(JSON.stringify(result.data[0] || null), {
       status: 201,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (error) {
-    return new Response(JSON.stringify({ error: "Failed to create book" }), {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : "Failed to create book";
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });

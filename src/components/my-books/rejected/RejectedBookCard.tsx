@@ -64,7 +64,7 @@ export function RejectedBookCard({ book, onMoveToRead, onDelete }: RejectedBookC
       <CardFooter>
         <Button variant="outline" className="flex-1 hover:bg-blue-100" onClick={handleMoveToRead} disabled={isMoving}>
           <BookMarked className="mr-2 h-4 w-4" />
-          Move to "To Read"
+          Move to &quot;To Read&quot;
         </Button>
       </CardFooter>
     </Card>

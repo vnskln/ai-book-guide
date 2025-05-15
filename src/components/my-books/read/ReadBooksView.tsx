@@ -9,14 +9,16 @@ import { LoadingState } from "@/components/LoadingState";
 const AddBookContext = React.createContext<{
   openAddBookModal: () => void;
 }>({
-  openAddBookModal: () => {},
+  // Default implementation logs a warning when used outside provider
+  openAddBookModal: () => {
+    // No-op implementation when used outside provider
+  },
 });
 
 // Export the hook for other components to use
 export const useAddBook = () => React.useContext(AddBookContext);
 
 export function ReadBooksView() {
-  console.log("ReadBooksView is mounting");
   const { books, isLoading, error, pagination, fetchBooks, addBook, deleteBook, updateRating } = useReadBooks();
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
 

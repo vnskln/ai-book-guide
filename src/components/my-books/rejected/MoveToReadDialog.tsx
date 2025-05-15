@@ -28,10 +28,10 @@ export function MoveToReadDialog({ isOpen, bookTitle, onClose, onConfirm }: Move
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Move to "To Read" List</AlertDialogTitle>
+          <AlertDialogTitle>Move to &quot;To Read&quot; List</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to move "{bookTitle}" to your "To Read" list? This will remove it from your rejected
-            books.
+            Are you sure you want to move &quot;{bookTitle}&quot; to your &quot;To Read&quot; list? This will remove it
+            from your rejected books.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

@@ -35,7 +35,9 @@ function ThrowErrorComponent(): React.ReactNode {
 describe("ErrorBoundary", () => {
   // Suppress console.error during tests
   beforeEach(() => {
-    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {
+      // Intentionally empty to suppress error output during tests
+    });
   });
 
   afterEach(() => {
