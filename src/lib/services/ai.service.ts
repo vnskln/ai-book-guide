@@ -107,14 +107,18 @@ export class AIService {
 
   /**
    * Generates a book recommendation based on user preferences and reading history
+   * Note: In this mock implementation, the parameters are not used
    * @param userPreferences User's reading preferences
    * @param readBooks List of books the user has read
    * @param rejectedBooks List of books the user has rejected
    * @returns Mock recommendation result
    */
   public async generateRecommendation(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     userPreferences: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     readBooks: string[],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     rejectedBooks: string[]
   ): Promise<{
     result: MockRecommendationResult;

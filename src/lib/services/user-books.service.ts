@@ -5,6 +5,28 @@ import { UserBookStatus } from "../../types";
 import type { GetUserBooksQuery } from "../schemas/user-books.schema";
 import { NotFoundError, InternalServerError, ForbiddenError } from "../errors";
 
+interface BookAuthor {
+  authors: AuthorDto;
+}
+
+interface SupabaseBook {
+  title: string;
+  language: string;
+  book_authors: BookAuthor[];
+}
+
+interface SupabaseUserBook {
+  id: string;
+  book_id: string;
+  status: string;
+  is_recommended: boolean;
+  rating: boolean | null;
+  recommendation_id: string | null;
+  created_at: string;
+  updated_at: string;
+  books: SupabaseBook;
+}
+
 export class UserBooksService {
   constructor(private readonly supabase: SupabaseClient) {}
 
@@ -111,20 +133,7 @@ export class UserBooksService {
     if (userBookError) throw new Error(`Error creating user book: ${userBookError.message}`);
     if (!userBook) throw new Error("No user book data returned after creation");
 
-    // Transform response to match DTO
-    return {
-      id: userBook.id,
-      book_id: userBook.book_id,
-      title: userBook.books.title,
-      language: userBook.books.language,
-      authors: userBook.books.book_authors.map((ba: any) => ba.authors),
-      status: userBook.status as UserBookStatus,
-      is_recommended: userBook.is_recommended,
-      rating: userBook.rating,
-      recommendation_id: userBook.recommendation_id,
-      created_at: userBook.created_at,
-      updated_at: userBook.updated_at,
-    };
+    return this.transformUserBookResponse(userBook as SupabaseUserBook);
   }
 
   async getUserBooks(userId: string, query: GetUserBooksQuery): Promise<UserBookPaginatedResponseDto> {
@@ -429,6 +438,22 @@ export class UserBooksService {
       title: userBook.books.title,
       language: userBook.books.language,
       authors: userBook.books.book_authors.map((ba: any) => ba.authors),
+      status: userBook.status as UserBookStatus,
+      is_recommended: userBook.is_recommended,
+      rating: userBook.rating,
+      recommendation_id: userBook.recommendation_id,
+      created_at: userBook.created_at,
+      updated_at: userBook.updated_at,
+    };
+  }
+
+  private transformUserBookResponse(userBook: SupabaseUserBook): UserBookResponseDto {
+    return {
+      id: userBook.id,
+      book_id: userBook.book_id,
+      title: userBook.books.title,
+      language: userBook.books.language,
+      authors: userBook.books.book_authors.map((ba) => ba.authors),
       status: userBook.status as UserBookStatus,
       is_recommended: userBook.is_recommended,
       rating: userBook.rating,

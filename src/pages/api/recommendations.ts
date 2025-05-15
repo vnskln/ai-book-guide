@@ -177,7 +177,7 @@ export const PUT: APIRoute = async ({ request, locals }) => {
               book: {
                 title: recommendation.books.title,
                 language: recommendation.books.language,
-                authors: recommendation.books.book_authors.map((ba: any) => ({
+                authors: recommendation.books.book_authors.map((ba: { authors: { name: string } }) => ({
                   name: ba.authors.name,
                 })),
               },

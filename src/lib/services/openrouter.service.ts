@@ -122,7 +122,7 @@ IMPORTANT LANGUAGE REQUIREMENTS:
       readBooks.forEach((book) => {
         const authorNames = book.authors?.map((author: AuthorDto) => author.name).join(", ") || "Unknown author";
         // Add rating information to read books if available
-        const ratingInfo = book.hasOwnProperty("rating")
+        const ratingInfo = Object.prototype.hasOwnProperty.call(book, "rating")
           ? book.rating === true
             ? " (liked)"
             : book.rating === false

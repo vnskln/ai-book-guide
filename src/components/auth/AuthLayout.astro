@@ -3,98 +3,112 @@ interface Props {
   title: string;
 }
 
+// Using title for document title in the Astro layout
 const { title } = Astro.props;
 ---
 
-<div class="min-h-screen bg-gradient-to-b from-background to-secondary/10">
-  <div class="container mx-auto px-4 py-16">
-    <div class="text-center mb-12">
-      <h1
-        class="text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/50 mb-4"
-      >
-        AI Book Guide
-      </h1>
-      <p class="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
-        Discover books perfectly matched to your interests through artificial intelligence
-      </p>
-    </div>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} | AI Book Guide</title>
+    <!-- Other head elements are included in the main layout -->
+  </head>
+  <body>
+    <div class="min-h-screen bg-gradient-to-b from-background to-secondary/10">
+      <div class="container mx-auto px-4 py-16">
+        <div class="text-center mb-12">
+          <h1
+            class="text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/50 mb-4"
+          >
+            AI Book Guide
+          </h1>
+          <p class="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
+            Discover books perfectly matched to your interests through artificial intelligence
+          </p>
+        </div>
 
-    <div class="grid md:grid-cols-2 gap-8 items-center max-w-6xl mx-auto">
-      <div class="hidden md:block">
-        <div class="relative">
-          <!-- Book stack illustration -->
-          <div class="absolute -top-6 -left-6 w-24 h-32 bg-primary/20 rounded-lg transform rotate-[-15deg]"></div>
-          <div class="absolute -top-3 -left-3 w-24 h-32 bg-primary/30 rounded-lg transform rotate-[-10deg]"></div>
-          <div class="w-24 h-32 bg-primary/40 rounded-lg transform rotate-[-5deg]"></div>
+        <div class="grid md:grid-cols-2 gap-8 items-center max-w-6xl mx-auto">
+          <div class="hidden md:block">
+            <div class="relative">
+              <!-- Book stack illustration -->
+              <div class="absolute -top-6 -left-6 w-24 h-32 bg-primary/20 rounded-lg transform rotate-[-15deg]"></div>
+              <div class="absolute -top-3 -left-3 w-24 h-32 bg-primary/30 rounded-lg transform rotate-[-10deg]"></div>
+              <div class="w-24 h-32 bg-primary/40 rounded-lg transform rotate-[-5deg]"></div>
 
-          <!-- Features list -->
-          <div class="mt-12 space-y-6">
-            <div class="flex items-start space-x-4">
-              <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-4 w-4 text-primary"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  ></path>
-                </svg>
-              </div>
-              <div>
-                <h3 class="font-semibold">Personalized Recommendations</h3>
-                <p class="text-muted-foreground">Receive book suggestions tailored to your preferences</p>
-              </div>
-            </div>
-            <div class="flex items-start space-x-4">
-              <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-4 w-4 text-primary"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                </svg>
-              </div>
-              <div>
-                <h3 class="font-semibold">Quick Discovery</h3>
-                <p class="text-muted-foreground">Save time finding your next book to read</p>
-              </div>
-            </div>
-            <div class="flex items-start space-x-4">
-              <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-4 w-4 text-primary"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                  ></path>
-                </svg>
-              </div>
-              <div>
-                <h3 class="font-semibold">Your Library</h3>
-                <p class="text-muted-foreground">Manage your collection and track your reading progress</p>
+              <!-- Features list -->
+              <div class="mt-12 space-y-6">
+                <div class="flex items-start space-x-4">
+                  <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-4 w-4 text-primary"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold">Personalized Recommendations</h3>
+                    <p class="text-muted-foreground">Receive book suggestions tailored to your preferences</p>
+                  </div>
+                </div>
+                <div class="flex items-start space-x-4">
+                  <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-4 w-4 text-primary"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold">Quick Discovery</h3>
+                    <p class="text-muted-foreground">Save time finding your next book to read</p>
+                  </div>
+                </div>
+                <div class="flex items-start space-x-4">
+                  <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-4 w-4 text-primary"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold">Your Library</h3>
+                    <p class="text-muted-foreground">Manage your collection and track your reading progress</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+
+          <div>
+            <slot />
+          </div>
         </div>
       </div>
-
-      <div>
-        <slot />
-      </div>
     </div>
-  </div>
-</div>
+  </body>
+</html>

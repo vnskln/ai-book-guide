@@ -7,8 +7,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function ResetPasswordForm() {
   const [email, setEmail] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [error] = useState<string | null>(null);
+  const [success] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,8 +21,8 @@ export function ResetPasswordForm() {
         <CardHeader>
           <CardTitle>Check Your Email</CardTitle>
           <CardDescription>
-            We've sent a password reset link to your email address. Please check your inbox and click the link to reset
-            your password.
+            We&apos;ve sent a password reset link to your email address. Please check your inbox and click the link to
+            reset your password.
           </CardDescription>
         </CardHeader>
         <CardFooter className="pt-6">
@@ -38,7 +38,9 @@ export function ResetPasswordForm() {
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
         <CardTitle>Reset Password</CardTitle>
-        <CardDescription>Enter your email address and we'll send you a link to reset your password</CardDescription>
+        <CardDescription>
+          Enter your email address and we&apos;ll send you a link to reset your password
+        </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">

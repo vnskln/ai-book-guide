@@ -26,71 +26,6 @@ interface BookDetailsResult {
   authors: BookAuthorRelation[];
 }
 
-interface RecommendationResponse {
-  id: string;
-  book: {
-    id: string;
-    title: string;
-    language: string;
-    authors: BookAuthor[];
-  };
-  plot_summary: string;
-  rationale: string;
-  ai_model: string;
-  execution_time: number;
-  status: RecommendationStatus;
-  created_at: string;
-  updated_at: string;
-}
-
-/**
- * Parse execution time from various formats
- * @param value The execution time value from database
- * @returns The execution time in milliseconds
- */
-function parseExecutionTime(value: unknown): number {
-  logger.info("Parsing execution time", { value });
-  if (value === null || value === undefined) {
-    return 1; // Default to 1 ms for null/undefined values
-  }
-
-  if (typeof value === "number") {
-    return isNaN(value) ? 1 : Math.max(1, value); // Ensure positive value
-  }
-
-  if (typeof value === "string") {
-    // Try to parse as number first
-    const numberValue = Number(value);
-    if (!isNaN(numberValue)) {
-      return Math.max(1, numberValue); // Ensure it's at least 1 to pass Zod validation
-    }
-
-    // Handle PostgreSQL interval format HH:MM:SS.MS like "00:00:02.5"
-    const pgIntervalMatch = value.match(/(\d+):(\d+):(\d+\.\d+|\d+)/);
-    if (pgIntervalMatch) {
-      const hours = parseInt(pgIntervalMatch[1], 10);
-      const minutes = parseInt(pgIntervalMatch[2], 10);
-      const seconds = parseFloat(pgIntervalMatch[3]);
-      const totalMs = (hours * 3600 + minutes * 60 + seconds) * 1000;
-      return Math.max(1, Math.round(totalMs)); // Ensure it's at least 1
-    }
-
-    // Handle PostgreSQL interval format like "2.5 seconds" or "2500 milliseconds"
-    const secondsMatch = value.match(/(\d+\.?\d*)\s*seconds?/i);
-    if (secondsMatch && secondsMatch[1]) {
-      return Math.max(1, Math.round(parseFloat(secondsMatch[1]) * 1000));
-    }
-
-    const msMatch = value.match(/(\d+\.?\d*)\s*milliseconds?/i);
-    if (msMatch && msMatch[1]) {
-      return Math.max(1, Math.round(parseFloat(msMatch[1])));
-    }
-  }
-
-  // Default to 1 if unparseable to pass Zod validation
-  return 1;
-}
-
 interface BookAuthor {
   author: {
     id: string;
@@ -541,7 +476,7 @@ export class RecommendationsService {
           id: rec.book.id,
           title: rec.book.title,
           language: rec.book.language,
-          authors: rec.book.authors.map((ba: any) => ({
+          authors: rec.book.authors.map((ba: BookAuthor) => ({
             id: ba.author.id,
             name: ba.author.name,
           })),
@@ -690,7 +625,7 @@ export class RecommendationsService {
           id: updatedRecommendation.book.id,
           title: updatedRecommendation.book.title,
           language: updatedRecommendation.book.language,
-          authors: updatedRecommendation.book.authors.map((ba: any) => ({
+          authors: updatedRecommendation.book.authors.map((ba: BookAuthor) => ({
             id: ba.author.id,
             name: ba.author.name,
           })),

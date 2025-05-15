@@ -33,7 +33,7 @@ export function LoginForm() {
 
       // Redirect to recommendations page on success
       window.location.href = "/recommendations";
-    } catch (err) {
+    } catch {
       setError("Login failed");
     } finally {
       setIsLoading(false);
@@ -87,7 +87,7 @@ export function LoginForm() {
             {isLoading ? "Signing in..." : "Sign In"}
           </Button>
           <p className="text-sm text-center">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <a href="/register" className="text-primary hover:underline">
               Sign Up
             </a>
