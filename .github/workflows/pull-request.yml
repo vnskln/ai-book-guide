@@ -64,6 +64,11 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            console.log(`Context Repo Owner: ${{ context.repo.owner }}`);
+            console.log(`Context Repo Name: ${{ context.repo.repo }}`);
+            console.log(`Full context.repo object: ${{ toJson(context.repo) }}`);
+            console.log(`GITHUB_REPOSITORY environment variable: ${{ env.GITHUB_REPOSITORY }}`);
+
             const lintStatus = '${{ needs.lint.result }}';
             const testStatus = '${{ needs.test.result }}';
             const coverage = '${{ needs.test.outputs.COVERAGE }}';
