@@ -26,9 +26,9 @@ AI Book Guide is a smart book recommendation system powered by Claude 3.5 Sonnet
 - [OpenRouter.ai](https://openrouter.ai/) - API access to Claude 3.5 Sonnet and other AI models
 
 ## Testing Stack
-- [Vitest](https://vitest.dev/) - Unit and integration testing framework
-- [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) - Testing React components
-- [Playwright](https://playwright.dev/) - End-to-end testing
+- [Vitest](https://vitest.dev/) v1.4.0 - Unit and integration testing framework
+- [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) v14.2.1 - Testing React components
+- [Playwright](https://playwright.dev/) v1.42.1 - End-to-end testing
 
 ## Getting Started Locally
 
@@ -79,10 +79,11 @@ http://localhost:3000
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Fix ESLint issues
 - `npm run format` - Format code with Prettier
-- `npm run test` - Run all tests
-- `npm run test:unit` - Run unit tests
-- `npm run test:integration` - Run integration tests
-- `npm run test:e2e` - Run end-to-end tests
+- `npm run test` - Run Vitest tests
+- `npm run test:ui` - Run Vitest with UI
+- `npm run test:coverage` - Run tests with coverage
+- `npm run test:e2e` - Run Playwright end-to-end tests
+- `npm run test:e2e:ui` - Run Playwright tests with UI
 
 ## Project Scope
 
@@ -105,7 +106,15 @@ http://localhost:3000
 
 ## Project Status
 
-This project is currently in development. The initial MVP is being built with a focus on core recommendation features.
+This project is currently in active development. The core user authentication, book management, and recommendation features have been implemented. The application includes:
+
+- User registration and login
+- User preferences management
+- Book management (add, rate, view)
+- Book recommendation system
+- Personalized reading lists (read, to-read, rejected)
+
+We are using Supabase for authentication and database management with a fully typed interface.
 
 ## License
 
@@ -116,17 +125,23 @@ MIT
 ```
 .
 ├── src/
-│   ├── layouts/    # Astro layouts
-│   ├── pages/      # Astro pages
-│   │   └── api/    # API endpoints
-│   ├── middleware/ # Astro middleware
-│   ├── db/         # Supabase clients and types
-│   ├── types.ts    # Shared types (Entities, DTOs)
 │   ├── components/ # UI components (Astro & React)
 │   │   └── ui/     # Shadcn/ui components
+│   ├── db/         # Supabase clients and types
+│   ├── hooks/      # React hooks
+│   ├── layouts/    # Astro layouts
 │   ├── lib/        # Services and helpers
-│   └── assets/     # Static internal assets
+│   ├── middleware/ # Astro middleware
+│   ├── pages/      # Astro pages
+│   │   ├── api/    # API endpoints
+│   │   ├── my-books/  # Book management pages
+│   │   ├── profile/   # User profile pages
+│   │   └── recommendations/ # Recommendation pages
+│   ├── styles/     # Global styles
+│   └── types.ts    # Shared types (Entities, DTOs)
 ├── public/         # Public assets
+├── e2e/           # End-to-end tests
+└── supabase/      # Supabase configuration and migrations
 ```
 
 ## AI Development Support
