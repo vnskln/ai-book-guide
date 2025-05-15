@@ -22,3 +22,4 @@ CI/CD i Hosting:
 Testing - Kompleksowy zestaw narzędzi do testowania:
 - Vitest i React Testing Library do testów jednostkowych i integracyjnych
 - Playwright do testów end-to-end (E2E)
+- Codecov do sprawdzania code coverage
