@@ -65,5 +65,13 @@ export default tseslint.config(
   jsxA11yConfig,
   reactConfig,
   eslintPluginAstro.configs["flat/recommended"],
+  {
+    files: ["astro.config.mjs"],
+    languageOptions: {
+      globals: {
+        URL: "readonly",
+      },
+    },
+  },
   eslintPluginPrettier
 );
