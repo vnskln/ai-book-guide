@@ -17,7 +17,6 @@ const gitignorePath = path.resolve(__dirname, ".gitignore");
 
 const baseConfig = tseslint.config({
   extends: [eslint.configs.recommended, tseslint.configs.strict, tseslint.configs.stylistic],
-  ignores: ["src/db/database.types.ts"],
   rules: {
     "no-console": "warn",
     "no-unused-vars": "off",
@@ -58,6 +57,9 @@ const reactConfig = tseslint.config({
 });
 
 export default tseslint.config(
+  {
+    ignores: ["src/db/database.types.ts", "vitest.setup.ts"],
+  },
   includeIgnoreFile(gitignorePath),
   baseConfig,
   jsxA11yConfig,

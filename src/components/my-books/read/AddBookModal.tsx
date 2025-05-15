@@ -92,7 +92,7 @@ export function AddBookModal({ isOpen, onClose, onAdd }: AddBookModalProps) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Read Book</DialogTitle>
-          <DialogDescription>Enter information about the book you've read</DialogDescription>
+          <DialogDescription>Enter information about the book you&apos;ve read</DialogDescription>
         </DialogHeader>
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
